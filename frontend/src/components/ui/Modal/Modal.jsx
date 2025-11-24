@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
 const Modal = ({ 
   isOpen, 
@@ -8,6 +8,16 @@ const Modal = ({
   size = 'md',
   className = ''
 }) => {
+  useEffect(() => {
+    const prev = document.body.style.overflow;
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const sizeClasses = {
@@ -18,7 +28,7 @@ const Modal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div 
         className="fixed inset-0 bg-primary-900/50 bg-opacity-50 transition-opacity"
@@ -26,9 +36,9 @@ const Modal = ({
       />
       
       {/* Modal Container */}
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="flex min-h-screen items-center justify-center p-4 overflow-y-auto">
         <div 
-          className={`relative bg-white rounded-xl shadow-premium w-full ${sizeClasses[size]} ${className}`}
+          className={`relative bg-white rounded-xl shadow-premium w-full ${sizeClasses[size]} ${className} max-h-[80vh] overflow-hidden`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
@@ -47,8 +57,8 @@ const Modal = ({
             </div>
           )}
           
-          {/* Content */}
-          <div className={!title ? 'p-6' : ''}>
+          {/* Content -- make this the scrollable area inside the modal */}
+          <div className={`${!title ? 'p-6' : 'p-6'} overflow-y-auto max-h-[calc(80vh-6rem)]`}>
             {children}
           </div>
         </div>

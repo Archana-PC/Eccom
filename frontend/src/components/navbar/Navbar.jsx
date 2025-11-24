@@ -18,7 +18,9 @@ const Navbar = ({
     showSearch: true,
     showUserAccount: true,
     showCart: true,
-    cartItemsCount: 0
+    cartItemsCount: 0,
+    showWishlist: true,
+    wishlistItemsCount: 0
   },  
   customContent = {
     leftContent: null,
@@ -114,6 +116,22 @@ const Navbar = ({
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                       </svg>
+                    </Link>
+                  )}
+                  
+                  {navConfig.showWishlist && (
+                    <Link 
+                      to="/wishlist" 
+                      className="p-2 text-neutral-600 hover:text-primary-700 hover:bg-primary-50 rounded-full transition-all duration-200 relative"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      {navConfig.wishlistItemsCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-semibold">
+                          {navConfig.wishlistItemsCount > 9 ? '9+' : navConfig.wishlistItemsCount}
+                        </span>
+                      )}
                     </Link>
                   )}
                   

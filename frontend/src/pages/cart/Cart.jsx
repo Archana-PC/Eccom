@@ -1,48 +1,56 @@
 import React from 'react';
+import { useCart } from '../../context/CartContext';
 import CartNavbar from '../../components/navbar/varitants/CartNavbar';
 import Button from '../../components/ui/Button/Button';
 
 const Cart = () => {
-  const cartItemsCount = 3;
+  const { items, removeFromCart, updateQuantity, getCartItemsCount, getCartSubtotal } = useCart();
   
-  const cartItems = [
-    {
-      id: 1,
-      name: "Classic White T-Shirt",
-      price: 29.99,
-      originalPrice: 39.99,
-      size: "M",
-      color: "White",
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=100&h=100&fit=crop",
-      category: "T-Shirts"
-    },
-    {
-      id: 2,
-      name: "Slim Fit Jeans",
-      price: 79.99,
-      size: "32x32",
-      color: "Dark Blue",
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=100&h=100&fit=crop",
-      category: "Jeans"
-    },
-    {
-      id: 3,
-      name: "Running Shoes",
-      price: 89.99,
-      size: "US 10",
-      color: "Black",
-      quantity: 1,
-      image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop",
-      category: "Footwear"
-    }
-  ];
-
-  const subtotal = cartItems.reduce((total, item) => total + item.price * item.quantity, 0);
-  const shipping = 5.99;
+  const cartItemsCount = getCartItemsCount();
+  const subtotal = getCartSubtotal();
+  const shipping = cartItemsCount > 0 ? (subtotal > 100 ? 0 : 5.99) : 0;
   const tax = subtotal * 0.08; // 8% tax
   const total = subtotal + shipping + tax;
+
+  const handleRemoveItem = (cartItemId) => {
+    removeFromCart(cartItemId);
+  };
+
+  const handleQuantityChange = (cartItemId, newQuantity) => {
+    if (newQuantity === 0) {
+      removeFromCart(cartItemId);
+    } else {
+      updateQuantity(cartItemId, newQuantity);
+    }
+  };
+
+  if (cartItemsCount === 0) {
+    return (
+      <div className="min-h-screen bg-neutral-50">
+        <CartNavbar cartItemsCount={cartItemsCount} />
+        
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+          <div className="bg-white rounded-xl shadow-md border border-neutral-200 p-6 lg:p-8 text-center">
+            <div className="mb-8">
+              <svg className="mx-auto h-24 w-24 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Your Cart is Empty</h1>
+              <p className="text-neutral-600 mb-8">Looks like you haven't added anything to your cart yet.</p>
+              <Button
+                variant="premium"
+                size="large"
+                className="text-lg py-4 px-8"
+                onClick={() => window.location.href = '/'}
+              >
+                START SHOPPING
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -58,8 +66,8 @@ const Cart = () => {
           
           {/* Cart Items */}
           <div className="space-y-6 mb-8">
-            {cartItems.map((item) => (
-              <div key={item.id} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 lg:p-6 border border-neutral-200 rounded-lg hover:shadow-md transition-all duration-200">
+            {items.map((item) => (
+              <div key={item.cartItemId} className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 lg:p-6 border border-neutral-200 rounded-lg hover:shadow-md transition-all duration-200">
                 <div className="flex items-start space-x-4 flex-1">
                   <img 
                     src={item.image} 
@@ -70,9 +78,26 @@ const Cart = () => {
                     <h3 className="font-semibold text-slate-900 text-lg mb-1">{item.name}</h3>
                     <p className="text-neutral-500 text-sm mb-2">{item.category}</p>
                     <div className="flex flex-wrap gap-4 text-sm text-neutral-600">
-                      <span>Size: {item.size}</span>
-                      <span>Color: {item.color}</span>
-                      <span>Qty: {item.quantity}</span>
+                      <span>Size: {item.selectedSize}</span>
+                      <span>Color: {item.selectedColor}</span>
+                    </div>
+                    <div className="flex items-center space-x-3 mt-3">
+                      <span className="text-sm text-neutral-600">Qty:</span>
+                      <div className="flex items-center border rounded-lg">
+                        <button 
+                          onClick={() => handleQuantityChange(item.cartItemId, item.quantity - 1)}
+                          className="px-3 py-1 hover:bg-neutral-100 transition-colors"
+                        >
+                          -
+                        </button>
+                        <span className="px-3 py-1 border-x">{item.quantity}</span>
+                        <button 
+                          onClick={() => handleQuantityChange(item.cartItemId, item.quantity + 1)}
+                          className="px-3 py-1 hover:bg-neutral-100 transition-colors"
+                        >
+                          +
+                        </button>
+                      </div>
                     </div>
                     {item.originalPrice && (
                       <div className="flex items-center space-x-2 mt-2">
@@ -87,14 +112,17 @@ const Cart = () => {
                 
                 <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto mt-4 sm:mt-0 space-x-6">
                   <div className="text-right">
-                    <p className="text-2xl font-bold text-slate-800">${item.price}</p>
+                    <p className="text-2xl font-bold text-slate-800">${(item.price * item.quantity).toFixed(2)}</p>
                     {item.originalPrice && (
                       <p className="text-green-600 text-sm font-semibold">
-                        You save ${(item.originalPrice - item.price).toFixed(2)}
+                        You save ${((item.originalPrice - item.price) * item.quantity).toFixed(2)}
                       </p>
                     )}
                   </div>
-                  <button className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors">
+                  <button 
+                    onClick={() => handleRemoveItem(item.cartItemId)}
+                    className="text-red-500 hover:text-red-700 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                  >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
@@ -115,7 +143,7 @@ const Cart = () => {
               </div>
               <div className="flex justify-between text-neutral-600">
                 <span>Shipping</span>
-                <span>${shipping.toFixed(2)}</span>
+                <span>{shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}</span>
               </div>
               <div className="flex justify-between text-neutral-600">
                 <span>Tax</span>
@@ -158,7 +186,10 @@ const Cart = () => {
 
             {/* Continue Shopping */}
             <div className="text-center mt-4">
-              <button className="text-slate-600 hover:text-slate-800 transition-colors font-medium">
+              <button 
+                onClick={() => window.location.href = '/'}
+                className="text-slate-600 hover:text-slate-800 transition-colors font-medium"
+              >
                 ← Continue Shopping
               </button>
             </div>

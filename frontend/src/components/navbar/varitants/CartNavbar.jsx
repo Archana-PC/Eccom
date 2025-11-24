@@ -1,8 +1,13 @@
 import React from 'react';
+import { useCart } from '../../../context/CartContext';
+import { useWishlist } from '../../../context/WishlistContext';
 import Navbar from '../Navbar';
 
 
-const CartNavbar = ({ cartItemsCount = 0, ...props }) => {
+const CartNavbar = ({ cartItemsCount, ...props }) => {
+  const { getCartItemsCount } = useCart();
+  const { getWishlistCount } = useWishlist();
+  const actualCartCount = cartItemsCount !== undefined ? cartItemsCount : getCartItemsCount();
   return (
     <Navbar
       bannerConfig={{
@@ -23,7 +28,9 @@ const CartNavbar = ({ cartItemsCount = 0, ...props }) => {
         showSearch: false,
         showUserAccount: true,
         showCart: true,
-        cartItemsCount: cartItemsCount
+        cartItemsCount: actualCartCount,
+        showWishlist: true,
+        wishlistItemsCount: getWishlistCount()
       }}
       customContent={{
         centerContent: (

@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { useWishlist } from '../../../context/WishlistContext';
+import { useToast } from '../../../context/ToastContext';
 import Modal from '../Modal/Modal';
 import Button from '../Button/Button';
 
@@ -6,11 +8,15 @@ const QuickViewModal = ({
   product, 
   isOpen, 
   onClose, 
-  onAddToCart 
+  onAddToCart,
+  onAddToWishlist
 }) => {
   const [selectedSize, setSelectedSize] = useState(product.sizes?.[0] || '');
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
   const [quantity, setQuantity] = useState(1);
+  
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { showSuccess, showInfo } = useToast();
 
   if (!product) return null;
 
@@ -43,8 +49,16 @@ const QuickViewModal = ({
   };
 
   const handleWishlist = () => {
-    console.log('Added to wishlist:', product);
-    // Add your wishlist logic here
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+      showInfo(`${product.name} removed from wishlist`);
+    } else {
+      addToWishlist(product);
+      showSuccess(`${product.name} added to wishlist!`);
+    }
+    if (onAddToWishlist) {
+      onAddToWishlist(product);
+    }
   };
 
   const handleCompare = () => {
@@ -236,17 +250,17 @@ const QuickViewModal = ({
           {/* Additional Actions */}
           <div className="flex space-x-4">
             <Button
-              variant="outline"
+              variant={isInWishlist(product.id) ? "primary" : "outline"}
               size="medium"
               className="flex-1"
               onClick={handleWishlist}
               icon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" fill={isInWishlist(product.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               }
             >
-              Wishlist
+              {isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
             </Button>
             <Button
               variant="outline"

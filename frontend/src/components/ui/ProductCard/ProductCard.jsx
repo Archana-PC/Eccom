@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useWishlist } from '../../../context/WishlistContext';
 import Button from '../Button/Button';
 import QuickViewModal from '../QuickView/QuickViewModal';
 
@@ -12,6 +13,7 @@ const ProductCard = ({
   showQuickView = true 
 }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
+  const { isInWishlist } = useWishlist();
 
   const {
     id,
@@ -98,9 +100,13 @@ const ProductCard = ({
                 size="small"
                 iconOnly
                 onClick={handleAddToWishlist}
-                className="bg-white shadow-md hover:shadow-lg"
+                className={`shadow-md hover:shadow-lg ${
+                  isInWishlist(id) 
+                    ? "bg-red-500 text-white hover:bg-red-600" 
+                    : "bg-white hover:bg-neutral-50"
+                }`}
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill={isInWishlist(id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               </Button>
@@ -238,6 +244,7 @@ const ProductCard = ({
         isOpen={isQuickViewOpen}
         onClose={handleCloseQuickView}
         onAddToCart={onAddToCart}
+        onAddToWishlist={onAddToWishlist}
       />
     </>
   );

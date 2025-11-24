@@ -1,9 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
+import { useWishlist } from '../../context/WishlistContext';
+import { useToast } from '../../context/ToastContext';
 import HomeNavbar from '../../components/navbar/varitants/HomeNavbar';
 import ProductCard from '../../components/ui/ProductCard/ProductCard';
 
 const Home = () => {
+  const { addToCart } = useCart();
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const { showSuccess, showInfo } = useToast();
+  
   const featuredProducts = [
     {
       id: 1,
@@ -62,13 +69,18 @@ const Home = () => {
   ];
 
   const handleAddToCart = (product) => {
-    console.log('Adding to cart:', product);
-    // Add your cart logic here
+    addToCart(product);
+    showSuccess(`${product.name} added to cart!`);
   };
 
   const handleAddToWishlist = (product) => {
-    console.log('Adding to wishlist:', product);
-    // Add your wishlist logic here
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+      showInfo(`${product.name} removed from wishlist`);
+    } else {
+      addToWishlist(product);
+      showSuccess(`${product.name} added to wishlist!`);
+    }
   };
 
   return (

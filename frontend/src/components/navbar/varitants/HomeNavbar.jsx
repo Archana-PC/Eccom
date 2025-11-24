@@ -1,8 +1,13 @@
 import React from 'react';
+import { useCart } from '../../../context/CartContext';
+import { useWishlist } from '../../../context/WishlistContext';
 import Navbar from '../Navbar';
 
 
 const HomeNavbar = (props) => {
+  const { getCartItemsCount } = useCart();
+  const { getWishlistCount } = useWishlist();
+  
   return (
     <Navbar
       navConfig={{
@@ -20,7 +25,9 @@ const HomeNavbar = (props) => {
         showSearch: true,
         showUserAccount: true,
         showCart: true,
-        cartItemsCount: 0
+        cartItemsCount: getCartItemsCount(),
+        showWishlist: true,
+        wishlistItemsCount: getWishlistCount()
       }}
       {...props}
     />
