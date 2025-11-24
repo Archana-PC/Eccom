@@ -1,18 +1,19 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Navbar from './components/navbar/Navbar';
-import Home from './pages/home/home';
-
+import Home from './pages/home/Home';
+import Cart from './pages/cart/Cart';
 
 
 function App() {
   return (
       <div className="App">
-        <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/cart" element={<Cart />} />
+          {/* <Route path="/collections" element={<Collections />} /> */}
           {/* Add more routes as needed */}
-        </Routes>
+        </Routes> 
+       
       </div>
   );
 }
