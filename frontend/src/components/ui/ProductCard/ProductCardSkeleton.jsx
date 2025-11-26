@@ -4,7 +4,7 @@ const ProductCardSkeleton = ({ className = "" }) => {
   return (
     <div className={`bg-white rounded-xl shadow-elegant border border-neutral-200 overflow-hidden animate-pulse ${className}`}>
       {/* Image Skeleton */}
-      <div className="aspect-[3/4] bg-neutral-200" />
+      <div className="aspect-3/4 bg-neutral-200" />
       
       {/* Content Skeleton */}
       <div className="p-4 lg:p-6">

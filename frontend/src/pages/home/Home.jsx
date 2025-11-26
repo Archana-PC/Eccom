@@ -1,16 +1,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { useCart } from '../../context/CartContext';
-import { useWishlist } from '../../context/WishlistContext';
-import { useToast } from '../../context/ToastContext';
-import HomeNavbar from '../../components/navbar/varitants/HomeNavbar';
 import ProductCard from '../../components/ui/ProductCard/ProductCard';
+import Carousel from '../../components/carousel/Carousel';
+import CategoriesSection from '../../components/sections/CategoriesSection/CategoriesSection';
 
-const Home = () => {
-  const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const { showSuccess, showInfo } = useToast();
-  
+
+const Home = () => {  
   const featuredProducts = [
     {
       id: 1,
@@ -68,77 +63,54 @@ const Home = () => {
     }
   ];
 
-  const handleAddToCart = (product) => {
-    addToCart(product);
-    showSuccess(`${product.name} added to cart!`);
-  };
-
-  const handleAddToWishlist = (product) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-      showInfo(`${product.name} removed from wishlist`);
-    } else {
-      addToWishlist(product);
-      showSuccess(`${product.name} added to wishlist!`);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-neutral-50">
-      <HomeNavbar />
-      
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 text-white py-20 lg:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-            ELEVATE YOUR STYLE
-          </h1>
-          <p className="text-xl md:text-2xl mb-8 opacity-95 max-w-3xl mx-auto leading-relaxed">
-            Discover premium men's fashion that blends sophistication with modern comfort
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link
-              to="/collections"
-              className="bg-amber-500 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-amber-600 transition-colors shadow-lg"
-            >
-              SHOP COLLECTIONS
-            </Link>
-            <Link
-              to="/new-drops"
-              className="border-2 border-white text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-white hover:text-slate-900 transition-colors"
-            >
-              VIEW NEW DROPS
-            </Link>
-          </div>
-        </div>
-      </section>
+      {/* Hero Carousel */}
+      <Carousel>
+        <img
+          src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1470&q=80" 
+          alt
+          ="Men's Fashion 3"
+          className="w-full h-full object-cover"
+        />
+        <img
+          src="https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=1470&q=80"
+          alt="Men's Fashion 1"
+          className="w-full h-full object-cover"
+        />
+        <img
+          src="https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=1470&q=80"   
+          alt="Men's Fashion 2"   
+          className="w-full h-full object-cover"
+        />
+       
+        <img
+          src="https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=1470&q=80"
+          alt="Men's Fashion 4"
+          className="w-full h-full object-cover"
+        />
+      </Carousel>
 
-      {/* Countdown Section */}
-      {/* <section className="bg-neutral-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">NEW COLLECTION DROPS SOON</h2>
-          <div className="flex justify-center space-x-6 md:space-x-8 text-2xl font-mono">
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold bg-amber-600 rounded-lg px-4 py-2">05</div>
-              <div className="text-sm mt-2 text-neutral-300">DAYS</div>
-            </div>
-            <div className="text-3xl md:text-4xl flex items-center text-amber-400">:</div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold bg-amber-600 rounded-lg px-4 py-2">12</div>
-              <div className="text-sm mt-2 text-neutral-300">HOURS</div>
-            </div>
-            <div className="text-3xl md:text-4xl flex items-center text-amber-400">:</div>
-            <div className="text-center">
-              <div className="text-3xl md:text-4xl font-bold bg-amber-600 rounded-lg px-4 py-2">45</div>
-              <div className="text-sm mt-2 text-neutral-300">MINUTES</div>
-            </div>
-          </div>
-          <p className="mt-6 text-neutral-400">November 27th, 2024 - Don't miss out!</p>
-        </div>
-      </section> */}
+      {/* Categories Section */}
+      <CategoriesSection
+        title="SHOP BY CATEGORY"
+        subtitle="Explore our curated collections designed for the modern man"
+        maxCategories={6}
+        variant="default"
+        columns={3}
+        showAll={true}
+        onCategoryClick={(category) => {
+          // Add analytics tracking
+          console.log('Homepage category click:', category);
+        }}
+        onSubcategoryClick={(subcategory) => {
+          // Add analytics tracking  
+          console.log('Homepage subcategory click:', subcategory);
+        }}
+      />
 
       {/* Featured Products */}
-        <section className="py-16 lg:py-20 bg-white">
+      <section className="py-16 lg:py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12 lg:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">
@@ -152,8 +124,8 @@ const Home = () => {
               <ProductCard
                 key={product.id}
                 product={product}
-                onAddToCart={handleAddToCart}
-                onAddToWishlist={handleAddToWishlist}
+                // onAddToCart={handleAddToCart}
+                // onAddToWishlist={handleAddToWishlist}
                 showQuickView={true}
               />
             ))}

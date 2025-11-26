@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import ReactDOM from 'react-dom';
 
 const Modal = ({ 
   isOpen, 
@@ -27,7 +28,7 @@ const Modal = ({
     xl: 'max-w-6xl'
   };
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div 
@@ -57,13 +58,19 @@ const Modal = ({
             </div>
           )}
           
-          {/* Content -- make this the scrollable area inside the modal */}
+          {/* Content */}
           <div className={`${!title ? 'p-6' : 'p-6'} overflow-y-auto max-h-[calc(80vh-6rem)]`}>
             {children}
           </div>
         </div>
       </div>
     </div>
+  );
+
+  // Create portal to render modal in modal-root
+  return ReactDOM.createPortal(
+    modalContent,
+    document.body
   );
 };
 

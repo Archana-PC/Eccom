@@ -1,65 +1,118 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useWishlist } from '../../context/WishlistContext';
-import { useCart } from '../../context/CartContext';
-import { useToast } from '../../context/ToastContext';
-import CartNavbar from '../../components/navbar/varitants/CartNavbar';
 import Button from '../../components/ui/Button/Button';
-import ProductCard from '../../components/ui/ProductCard/ProductCard';
 
 const Wishlist = () => {
-  const { items, removeFromWishlist, clearWishlist, getWishlistCount } = useWishlist();
-  const { addToCart } = useCart();
-  const { showSuccess, showInfo } = useToast();
-  
-  const wishlistCount = getWishlistCount();
-
-  const handleRemoveFromWishlist = (productId) => {
-    const product = items.find(item => item.id === productId);
-    removeFromWishlist(productId);
-    if (product) {
-      showInfo(`${product.name} removed from wishlist`);
+  const [wishlistItems, setWishlistItems] = useState([
+    {
+      id: 1,
+      name: "Classic White Sneakers",
+      price: 89.99,
+      originalPrice: 119.99,
+      image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=400&fit=crop",
+      brand: "SportStyle",
+      inStock: true,
+      colors: ['White', 'Black', 'Navy'],
+      sizes: ['US 8', 'US 9', 'US 10', 'US 11'],
+      rating: 4.5,
+      reviewCount: 128
+    },
+    {
+      id: 2,
+      name: "Leather Wallet",
+      price: 49.99,
+      image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=400&fit=crop",
+      brand: "Luxe",
+      inStock: true,
+      colors: ['Brown', 'Black'],
+      rating: 4.8,
+      reviewCount: 89
+    },
+    {
+      id: 3,
+      name: "Denim Jacket",
+      price: 79.99,
+      originalPrice: 99.99,
+      image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=400&fit=crop",
+      brand: "UrbanWear",
+      inStock: false,
+      colors: ['Blue', 'Black'],
+      sizes: ['S', 'M', 'L', 'XL'],
+      rating: 4.3,
+      reviewCount: 64
+    },
+    {
+      id: 4,
+      name: "Smart Watch",
+      price: 199.99,
+      originalPrice: 249.99,
+      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=400&fit=crop",
+      brand: "TechStyle",
+      inStock: true,
+      colors: ['Silver', 'Black', 'Gold'],
+      rating: 4.6,
+      reviewCount: 203
     }
+  ]);
+
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  const removeFromWishlist = (id) => {
+    setWishlistItems(items => items.filter(item => item.id !== id));
+    setSelectedItems(selected => selected.filter(itemId => itemId !== id));
   };
 
-  const handleAddToCart = (product) => {
-    addToCart(product);
-    showSuccess(`${product.name} added to cart!`);
+  const addToCart = (item) => {
+    // Mock add to cart functionality
+    alert(`${item.name} added to cart!`);
   };
 
-  const handleMoveToCart = (product) => {
-    addToCart(product);
-    removeFromWishlist(product.id);
-    showSuccess(`${product.name} moved to cart!`);
+  const toggleSelectItem = (id) => {
+    setSelectedItems(prev => 
+      prev.includes(id) 
+        ? prev.filter(itemId => itemId !== id)
+        : [...prev, id]
+    );
   };
 
-  const handleClearWishlist = () => {
-    clearWishlist();
-    showInfo('Wishlist cleared');
+  const selectAllItems = () => {
+    setSelectedItems(wishlistItems.map(item => item.id));
   };
 
-  if (wishlistCount === 0) {
+  const clearSelectedItems = () => {
+    setSelectedItems([]);
+  };
+
+  const removeSelectedItems = () => {
+    setWishlistItems(items => items.filter(item => !selectedItems.includes(item.id)));
+    setSelectedItems([]);
+  };
+
+  const moveSelectedToCart = () => {
+    const selectedProducts = wishlistItems.filter(item => selectedItems.includes(item.id));
+    selectedProducts.forEach(item => addToCart(item));
+    removeSelectedItems();
+  };
+
+  if (wishlistItems.length === 0) {
     return (
-      <div className="min-h-screen bg-neutral-50">
-        <CartNavbar />
-        
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-          <div className="bg-white rounded-xl shadow-md border border-neutral-200 p-6 lg:p-8 text-center">
-            <div className="mb-8">
-              <svg className="mx-auto h-24 w-24 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      <div className="min-h-screen bg-gray-50 pt-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="text-center">
+            <div className="w-24 h-24 mx-auto mb-8 bg-gray-100 rounded-full flex items-center justify-center">
+              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
               </svg>
-              <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Your Wishlist is Empty</h1>
-              <p className="text-neutral-600 mb-8">Save your favorite items to your wishlist so you can find them later.</p>
-              <Button
-                variant="premium"
-                size="large"
-                className="text-lg py-4 px-8"
-                onClick={() => window.location.href = '/'}
-              >
-                DISCOVER PRODUCTS
-              </Button>
             </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">Your wishlist is empty</h1>
+            <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto">
+              Start adding items you love to your wishlist. They'll appear here for easy access later.
+            </p>
+            <Link to="/">
+              <Button variant="primary" size="large">
+                Start Shopping
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -67,152 +120,174 @@ const Wishlist = () => {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <CartNavbar />
-      
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="bg-white rounded-xl shadow-md border border-neutral-200 p-6 lg:p-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-            <div>
-              <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-2">Your Wishlist</h1>
-              <p className="text-neutral-600">{wishlistCount} {wishlistCount === 1 ? 'item' : 'items'} saved</p>
-            </div>
-            {wishlistCount > 0 && (
-              <div className="mt-4 sm:mt-0 flex space-x-3">
-                <Button
-                  variant="outline"
-                  size="medium"
-                  onClick={handleClearWishlist}
-                  className="text-red-600 border-red-600 hover:bg-red-50"
+    <div className="min-h-screen bg-gray-50 pt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">My Wishlist</h1>
+            <p className="text-gray-600 mt-2">{wishlistItems.length} item{wishlistItems.length !== 1 ? 's' : ''} saved</p>
+          </div>
+
+          {/* Bulk Actions */}
+          {wishlistItems.length > 0 && (
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={selectedItems.length === wishlistItems.length ? clearSelectedItems : selectAllItems}
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
                 >
-                  Clear All
-                </Button>
-              </div>
-            )}
-          </div>
-          
-          {/* Wishlist Items Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-            {items.map((product) => (
-              <div key={product.id} className="relative">
-                <ProductCard
-                  product={product}
-                  onAddToCart={handleAddToCart}
-                  onAddToWishlist={handleRemoveFromWishlist}
-                  showQuickView={true}
-                  className="h-full"
-                />
-                
-                {/* Wishlist Actions Overlay */}
-                <div className="absolute top-3 right-3 flex flex-col space-y-2 z-10">
-                  <Button
-                    variant="minimal"
-                    size="small"
-                    iconOnly
-                    onClick={() => handleRemoveFromWishlist(product.id)}
-                    className="bg-white shadow-md hover:shadow-lg text-red-500 hover:text-red-700"
-                    title="Remove from Wishlist"
-                  >
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M6 18L18 6M6 6l12 12" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </Button>
-                </div>
-
-                {/* Move to Cart Button */}
-                <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="small"
-                      className="flex-1 bg-white shadow-lg border-primary-600 text-primary-700 hover:bg-primary-50"
-                      onClick={() => handleMoveToCart(product)}
-                    >
-                      Move to Cart
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Wishlist Summary */}
-          <div className="bg-neutral-50 rounded-lg p-6 lg:p-8 border border-neutral-200">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">Wishlist Summary</h3>
-                <p className="text-neutral-600">
-                  You have {wishlistCount} {wishlistCount === 1 ? 'item' : 'items'} saved for later
-                </p>
+                  {selectedItems.length === wishlistItems.length ? 'Deselect All' : 'Select All'}
+                </button>
               </div>
               
-              <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3">
-                <Button
-                  variant="outline"
-                  size="large"
-                  onClick={() => window.location.href = '/'}
-                  className="whitespace-nowrap"
-                >
-                  Continue Shopping
-                </Button>
-                <Button
-                  variant="premium"
-                  size="large"
-                  onClick={() => {
-                    items.forEach(product => {
-                      addToCart(product);
-                    });
-                    clearWishlist();
-                    showSuccess('All items moved to cart!');
-                  }}
-                  className="whitespace-nowrap"
-                >
-                  Add All to Cart
-                </Button>
-              </div>
+              {selectedItems.length > 0 && (
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="outline"
+                    size="small"
+                    onClick={moveSelectedToCart}
+                  >
+                    Add to Cart ({selectedItems.length})
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="small"
+                    onClick={removeSelectedItems}
+                    className="text-red-600 hover:text-red-700"
+                  >
+                    Remove ({selectedItems.length})
+                  </Button>
+                </div>
+              )}
             </div>
-          </div>
+          )}
+        </div>
 
-          {/* Recommendations */}
-          <div className="mt-8 pt-8 border-t border-neutral-200">
-            <h3 className="text-xl font-semibold text-slate-900 mb-4">You might also like</h3>
-            <p className="text-neutral-600 mb-6">Based on your wishlist preferences</p>
-            
-            <div className="text-center py-12">
-              <p className="text-neutral-500 mb-4">Recommendations coming soon...</p>
-              <Link 
-                to="/" 
-                className="text-primary-600 hover:text-primary-700 font-medium transition-colors"
+        {/* Wishlist Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {wishlistItems.map((item) => (
+            <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+              {/* Selection Checkbox */}
+              <div className="absolute top-3 left-3 z-10">
+                <input
+                  type="checkbox"
+                  checked={selectedItems.includes(item.id)}
+                  onChange={() => toggleSelectItem(item.id)}
+                  className="w-4 h-4 text-primary-600 bg-white border-gray-300 rounded focus:ring-primary-500 focus:ring-2"
+                />
+              </div>
+
+              {/* Remove Button */}
+              <button
+                onClick={() => removeFromWishlist(item.id)}
+                className="absolute top-3 right-3 z-10 w-8 h-8 bg-white rounded-full shadow-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
               >
-                Explore all products →
-              </Link>
-            </div>
-          </div>
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
 
-          {/* Features */}
-          <div className="mt-8 pt-8 border-t border-neutral-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-              <div className="flex items-center justify-center space-x-2 text-sm text-neutral-600">
-                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-                <span>Save for Later</span>
-              </div>
-              <div className="flex items-center justify-center space-x-2 text-sm text-neutral-600">
-                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5-5-5h5zm0 0v-5a7.5 7.5 0 00-15 0v5" />
-                </svg>
-                <span>Price Drop Alerts</span>
-              </div>
-              <div className="flex items-center justify-center space-x-2 text-sm text-neutral-600">
-                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414A1 1 0 0117.414 13H20" />
-                </svg>
-                <span>Easy Sharing</span>
+              <Link to={`/product/${item.id}`} className="block">
+                {/* Product Image */}
+                <div className="relative">
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full h-64 object-cover"
+                  />
+                  
+                  {/* Stock Status */}
+                  {!item.inStock && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <span className="bg-white text-gray-900 px-3 py-1 rounded-full text-sm font-medium">
+                        Out of Stock
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Sale Badge */}
+                  {item.originalPrice && (
+                    <div className="absolute top-3 left-12">
+                      <span className="bg-red-500 text-white px-2 py-1 text-xs rounded-md font-medium">
+                        SALE
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Product Info */}
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.name}</h3>
+                  <p className="text-sm text-gray-600 mb-2">{item.brand}</p>
+                  
+                  {/* Rating */}
+                  <div className="flex items-center space-x-1 mb-2">
+                    <div className="flex items-center">
+                      {[...Array(5)].map((_, i) => (
+                        <svg
+                          key={i}
+                          className={`w-4 h-4 ${i < Math.floor(item.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600">({item.reviewCount})</span>
+                  </div>
+
+                  {/* Price */}
+                  <div className="flex items-center space-x-2 mb-3">
+                    <span className="text-lg font-bold text-gray-900">${item.price}</span>
+                    {item.originalPrice && (
+                      <span className="text-sm text-gray-500 line-through">${item.originalPrice}</span>
+                    )}
+                  </div>
+
+                  {/* Available Colors */}
+                  {item.colors && (
+                    <div className="flex items-center space-x-2 mb-3">
+                      <span className="text-xs text-gray-600">Colors:</span>
+                      <div className="flex space-x-1">
+                        {item.colors.slice(0, 3).map((color, index) => (
+                          <span key={index} className="text-xs text-gray-500">
+                            {color}{index < Math.min(item.colors.length - 1, 2) && ','}
+                          </span>
+                        ))}
+                        {item.colors.length > 3 && (
+                          <span className="text-xs text-gray-500">+{item.colors.length - 3}</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </Link>
+
+              {/* Action Button */}
+              <div className="px-4 pb-4">
+                <Button
+                  variant={item.inStock ? "primary" : "outline"}
+                  size="medium"
+                  fullWidth
+                  onClick={() => item.inStock ? addToCart(item) : null}
+                  disabled={!item.inStock}
+                >
+                  {item.inStock ? "Add to Cart" : "Notify When Available"}
+                </Button>
               </div>
             </div>
-          </div>
+          ))}
+        </div>
+
+        {/* Continue Shopping */}
+        <div className="mt-12 text-center">
+          <Link to="/">
+            <Button variant="outline" size="large">
+              Continue Shopping
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

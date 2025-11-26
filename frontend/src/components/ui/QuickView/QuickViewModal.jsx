@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useWishlist } from '../../../context/WishlistContext';
-import { useToast } from '../../../context/ToastContext';
 import Modal from '../Modal/Modal';
 import Button from '../Button/Button';
+import ProductImages from '../../../pages/productDetail/components/ProductImages/ProductImages';
+import ImageGallery from '../../../pages/productDetail/components/ProductImages/ImageGallery';
 
 const QuickViewModal = ({ 
   product, 
@@ -15,8 +15,8 @@ const QuickViewModal = ({
   const [selectedColor, setSelectedColor] = useState(product.colors?.[0] || '');
   const [quantity, setQuantity] = useState(1);
   
-  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
-  const { showSuccess, showInfo } = useToast();
+  // const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  // const { showSuccess, showInfo } = useToast();
 
   if (!product) return null;
 
@@ -37,29 +37,7 @@ const QuickViewModal = ({
 
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
 
-  const handleAddToCart = () => {
-    const cartItem = {
-      ...product,
-      selectedSize,
-      selectedColor,
-      quantity
-    };
-    onAddToCart(cartItem);
-    onClose();
-  };
 
-  const handleWishlist = () => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-      showInfo(`${product.name} removed from wishlist`);
-    } else {
-      addToWishlist(product);
-      showSuccess(`${product.name} added to wishlist!`);
-    }
-    if (onAddToWishlist) {
-      onAddToWishlist(product);
-    }
-  };
 
   const handleCompare = () => {
     console.log('Added to compare:', product);
@@ -77,24 +55,19 @@ const QuickViewModal = ({
         {/* Product Images */}
         <div className="lg:w-1/2">
           <div className="aspect-square bg-neutral-100 rounded-lg overflow-hidden mb-4">
-            <img 
-              src={images[0]} 
-              alt={name}
-              className="w-full h-full object-cover"
-            />
+             <ProductImages 
+                images={images} 
+                productName={name} 
+          />
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {images.slice(0, 4).map((image, index) => (
-              <div key={index} className="aspect-square bg-neutral-100 rounded overflow-hidden">
-                <img 
-                  src={image} 
-                  alt={`${name} ${index + 1}`}
-                  className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
-                />
-              </div>
-            ))}
+            <ImageGallery
+                images={images}
+          />
           </div>
         </div>
+        
+         
 
         {/* Product Details */}
         <div className="lg:w-1/2">
@@ -240,7 +213,7 @@ const QuickViewModal = ({
                 variant="primary"
                 size="large"
                 className="w-full py-3 text-lg"
-                onClick={handleAddToCart}
+                // onClick={handleAddToCart}
               >
                 Add to Cart - ${(price * quantity).toFixed(2)}
               </Button>
@@ -250,17 +223,17 @@ const QuickViewModal = ({
           {/* Additional Actions */}
           <div className="flex space-x-4">
             <Button
-              variant={isInWishlist(product.id) ? "primary" : "outline"}
+              // variant={isInWishlist(product.id) ? "primary" : "outline"}
               size="medium"
               className="flex-1"
-              onClick={handleWishlist}
+              // onClick={handleWishlist}
               icon={
-                <svg className="w-5 h-5" fill={isInWishlist(product.id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
               }
             >
-              {isInWishlist(product.id) ? "Remove from Wishlist" : "Add to Wishlist"}
+             
             </Button>
             <Button
               variant="outline"

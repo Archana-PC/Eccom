@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useWishlist } from '../../../context/WishlistContext';
+// import { useWishlist } from '../../../context/WishlistContext';
 import Button from '../Button/Button';
 import QuickViewModal from '../QuickView/QuickViewModal';
 
@@ -13,7 +13,7 @@ const ProductCard = ({
   showQuickView = true 
 }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  const { isInWishlist } = useWishlist();
+  // const { isInWishlist } = useWishlist();
 
   const {
     id,
@@ -34,21 +34,21 @@ const ProductCard = ({
 
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
 
-  const handleAddToCart = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onAddToCart) {
-      onAddToCart(product);
-    }
-  };
+  // const handleAddToCart = (e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   if (onAddToCart) {
+  //     onAddToCart(product);
+  //   }
+  // };
 
-  const handleAddToWishlist = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (onAddToWishlist) {
-      onAddToWishlist(product);
-    }
-  };
+  // const handleAddToWishlist = (e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   if (onAddToWishlist) {
+  //     onAddToWishlist(product);
+  //   }
+  // };
 
   const handleQuickView = (e) => {
     e.preventDefault();
@@ -64,7 +64,7 @@ const ProductCard = ({
     <>
       <div className={`group bg-white rounded-xl shadow-elegant border border-neutral-200 overflow-hidden hover:shadow-premium transition-all duration-300 ${className}`}>
         {/* Product Image Container */}
-        <div className="relative aspect-[3/4] bg-neutral-100 overflow-hidden">
+        <div className="relative aspect-3/4 bg-neutral-100 overflow-hidden">
           <Link to={`/product/${id}`}>
             <img 
               src={image} 
@@ -99,16 +99,16 @@ const ProductCard = ({
                 variant="minimal"
                 size="small"
                 iconOnly
-                onClick={handleAddToWishlist}
-                className={`shadow-md hover:shadow-lg ${
-                  isInWishlist(id) 
-                    ? "bg-red-500 text-white hover:bg-red-600" 
-                    : "bg-white hover:bg-neutral-50"
-                }`}
+                // onClick={handleAddToWishlist}
+                // className={`shadow-md hover:shadow-lg ${
+                //   isInWishlist(id) 
+                //     ? "bg-red-500 text-white hover:bg-red-600" 
+                //     : "bg-white hover:bg-neutral-50"
+                // }`}
               >
-                <svg className="w-4 h-4" fill={isInWishlist(id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
+                {/* <svg className="w-4 h-4" fill={isInWishlist(id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
+                </svg> */}
               </Button>
             )}
             
@@ -135,7 +135,7 @@ const ProductCard = ({
                 variant="primary"
                 size="medium"
                 className="w-full shadow-lg"
-                onClick={handleAddToCart}
+                // onClick={handleAddToCart}
               >
                 Add to Cart
               </Button>
@@ -230,7 +230,7 @@ const ProductCard = ({
               variant="primary"
               size="medium"
               className="w-full lg:hidden mt-2"
-              onClick={handleAddToCart}
+              // onClick={handleAddToCart}
             >
               Add to Cart
             </Button>
@@ -238,13 +238,14 @@ const ProductCard = ({
         </div>
       </div>
 
+
       {/* Quick View Modal */}
       <QuickViewModal
         product={product}
         isOpen={isQuickViewOpen}
         onClose={handleCloseQuickView}
-        onAddToCart={onAddToCart}
-        onAddToWishlist={onAddToWishlist}
+        // onAddToCart={onAddToCart}
+        // onAddToWishlist={onAddToWishlist}
       />
     </>
   );
