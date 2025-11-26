@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import CategorySidebar from '../sidebar/CategorySidebar';
 import Button from '../ui/Button/Button';
 import MobileMenuButton from '../ui/Button/MobileMenuButton';
+import AccountDropdown from '../account/AccountDropdown';
 
 const Navbar = ({  
   navConfig = {
@@ -17,7 +18,12 @@ const Navbar = ({
     showCart: true,
     cartItemsCount: 0,
     showWishlist: true,
-    wishlistItemsCount: 0
+    wishlistItemsCount: 0,
+    // Add showShowAll config
+    showShowAll: true, // Control SHOW ALL button visibility
+    // Add auth-related config
+    isLoggedIn: false,
+    user: null // { firstName: "John", lastName: "Doe", email: "john@example.com" }
   },  
   customContent = {
     leftContent: null,
@@ -29,6 +35,7 @@ const Navbar = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const defaultNavItems = [
     { name: 'HOME', path: '/' },
@@ -37,21 +44,13 @@ const Navbar = ({
     { name: 'BRANDS', path: '/brands' }
   ];
 
-  // Always use default items if navItems is empty, or use provided items
   const navigationItems = navConfig.navItems && navConfig.navItems.length > 0 ? navConfig.navItems : defaultNavItems;
 
-  // Debug logs
-  console.log('Navigation items:', navigationItems);
-  console.log('Sidebar open:', isSidebarOpen);
-
-  // Simplified hover handlers
   const handleSidebarOpen = () => {
-    console.log('Opening sidebar');
     setIsSidebarOpen(true);
   };
 
   const handleSidebarClose = () => {
-    console.log('Closing sidebar');
     setIsSidebarOpen(false);
   };
 
@@ -67,34 +66,36 @@ const Navbar = ({
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center h-16">
               
-              {/* Left Section - ALWAYS show SHOW ALL button + Navigation Items */}
+              {/* Left Section */}
               <div className="hidden lg:flex items-center space-x-4 flex-1 justify-start">
                 {customContent.leftContent || (
                   <>
-                    {/* SHOW ALL Button - ALWAYS rendered */}
-                    <div
-                      className="relative"
-                      onMouseEnter={handleSidebarOpen}
-                      onMouseLeave={handleSidebarClose}
-                    >
-                      <Button 
-                        variant="primary"
-                        size="medium"
-                        className='p-0! border-0! shadow-none!'  
-                        icon={
-                          <svg 
-                            className="w-4 h-4 text-black" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            viewBox="0 0 24 24"
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                          </svg>
-                        }
+                    {/* SHOW ALL Button - Conditionally rendered */}
+                    {navConfig.showShowAll && (
+                      <div
+                        className="relative"
+                        onMouseEnter={handleSidebarOpen}
+                        onMouseLeave={handleSidebarClose}
                       >
-                        <span className="text-black font-small">SHOW ALL</span>
-                      </Button>
-                    </div>
+                        <Button 
+                          variant="primary"
+                          size="medium"
+                          className='p-0! border-0! shadow-none!'  
+                          icon={
+                            <svg 
+                              className="w-4 h-4 text-black" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                          }
+                        >
+                          <span className="text-black font-small">SHOW ALL</span>
+                        </Button>
+                      </div>
+                    )}
 
                     {/* Other Navigation Items */}
                     <div className="flex items-center space-x-2">
@@ -109,7 +110,6 @@ const Navbar = ({
                           }`}
                         >
                           {item.name}
-                          {/* Active indicator */}
                           <span className={`absolute -bottom-2 left-0 w-full h-0.5 bg-primary-600 transition-all duration-200 ${
                             location.pathname === item.path ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                           }`} />
@@ -150,18 +150,11 @@ const Navbar = ({
                       />
                     )}
                     
+                    {/* Replace the simple user account button with AccountDropdown */}
                     {navConfig.showUserAccount && (
-                      <Button
-                        variant="ghost"
-                        size="medium"
-                        iconOnly
-                        onClick={() => window.location.href = '/account'}
-                        icon={
-                          <svg className="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        }
-                        className="text-neutral-600 hover:text-primary-600 hover:bg-primary-50"
+                      <AccountDropdown
+                        isLoggedIn={navConfig.isLoggedIn}
+                        user={navConfig.user}
                       />
                     )}
                     
@@ -171,7 +164,7 @@ const Navbar = ({
                           variant="ghost"
                           size="medium"
                           iconOnly
-                          onClick={() => window.location.href = '/wishlist'}
+                          onClick={() => navigate('/wishlist')}
                           icon={
                             <svg className="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -193,7 +186,7 @@ const Navbar = ({
                           variant="ghost"
                           size="medium"
                           iconOnly
-                          onClick={() => window.location.href = '/cart'}
+                          onClick={() => navigate('/cart')}
                           icon={
                             <svg className="w-5 h-5 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -212,7 +205,7 @@ const Navbar = ({
                 )}
               </div>
 
-              {/* Mobile Menu Button (Mobile only) */}
+              {/* Mobile Menu Button */}
               <div className="lg:hidden">
                 <MobileMenuButton
                   isOpen={isMenuOpen}
@@ -227,21 +220,23 @@ const Navbar = ({
             {isMenuOpen && (
               <div className="lg:hidden py-4 border-t border-neutral-200 bg-white">
                 <div className="flex flex-col space-y-3">
-                  {/* SHOW ALL in Mobile */}
-                  <div className="mb-3">
-                    <Button
-                      variant="primary"
-                      size="medium"
-                      fullWidth
-                      icon={
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                      }
-                    >
-                      <span className="text-white font-medium">SHOW ALL CATEGORIES</span>
-                    </Button>
-                  </div>
+                  {/* SHOW ALL in Mobile - Conditionally rendered */}
+                  {navConfig.showShowAll && (
+                    <div className="mb-3">
+                      <Button
+                        variant="primary"
+                        size="medium"
+                        fullWidth
+                        icon={
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                          </svg>
+                        }
+                      >
+                        <span className="text-white font-medium">SHOW ALL CATEGORIES</span>
+                      </Button>
+                    </div>
+                  )}
 
                   {/* Navigation Items */}
                   <div className="space-y-1">
@@ -280,24 +275,74 @@ const Navbar = ({
                       </Button>
                     )}
                     
+                    {/* Mobile Auth Links */}
                     {navConfig.showUserAccount && (
-                      <Button
-                        variant="ghost"
-                        size="medium"
-                        fullWidth
-                        onClick={() => {
-                          window.location.href = '/account';
-                          closeMobileMenu();
-                        }}
-                        icon={
-                          <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        }
-                        className="justify-start text-neutral-700"
-                      >
-                        <span className="text-neutral-700">My Account</span>
-                      </Button>
+                      <>
+                        {navConfig.isLoggedIn ? (
+                          <>
+                            <div className="px-4 py-2 border-b border-neutral-100 mb-2">
+                              <p className="text-sm font-semibold text-neutral-900">
+                                Hello, {navConfig.user?.firstName}
+                              </p>
+                              <p className="text-xs text-neutral-500">{navConfig.user?.email}</p>
+                            </div>
+                            <Link
+                              to="/account/profile"
+                              className="block py-3 px-4 text-neutral-700 hover:bg-primary-50 rounded-lg transition-colors"
+                              onClick={closeMobileMenu}
+                            >
+                              My Profile
+                            </Link>
+                            <Link
+                              to="/account/orders"
+                              className="block py-3 px-4 text-neutral-700 hover:bg-primary-50 rounded-lg transition-colors"
+                              onClick={closeMobileMenu}
+                            >
+                              My Orders
+                            </Link>
+                            <Link
+                              to="/wishlist"
+                              className="block py-3 px-4 text-neutral-700 hover:bg-primary-50 rounded-lg transition-colors"
+                              onClick={closeMobileMenu}
+                            >
+                              Wishlist
+                            </Link>
+                            <button
+                              onClick={() => {
+                                alert('Logged out successfully!');
+                                closeMobileMenu();
+                              }}
+                              className="block w-full text-left py-3 px-4 text-error-600 hover:bg-error-50 rounded-lg transition-colors"
+                            >
+                              Sign Out
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <Link
+                              to="/login"
+                              className="block py-3 px-4 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors font-medium"
+                              onClick={closeMobileMenu}
+                            >
+                              Sign In
+                            </Link>
+                            <Link
+                              to="/register"
+                              className="block py-3 px-4 text-neutral-700 hover:bg-primary-50 rounded-lg transition-colors"
+                              onClick={closeMobileMenu}
+                            >
+                              Create Account
+                            </Link>
+                            <Link
+                              to="/forgot-password"
+                              className="block py-3 px-4 text-neutral-500 hover:text-primary-600 rounded-lg transition-colors text-sm"
+                              onClick={closeMobileMenu}
+                            >
+                              Forgot Password?
+                            </Link>
+                          </>
+                        )}
+                      </>
                     )}
                     
                     {navConfig.showWishlist && (
@@ -306,13 +351,13 @@ const Navbar = ({
                         size="medium"
                         fullWidth
                         onClick={() => {
-                          window.location.href = '/wishlist';
+                          navigate('/wishlist');
                           closeMobileMenu();
                         }}
                         icon={
                           <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                        </svg>
+                          </svg>
                         }
                         className="justify-start text-neutral-700"
                       >
@@ -326,13 +371,13 @@ const Navbar = ({
                         size="medium"
                         fullWidth
                         onClick={() => {
-                          window.location.href = '/cart';
+                          navigate('/cart');
                           closeMobileMenu();
                         }}
                         icon={
                           <svg className="w-4 h-4 text-neutral-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                        </svg>
+                          </svg>
                         }
                         className="justify-start text-neutral-700"
                       >
@@ -347,12 +392,13 @@ const Navbar = ({
         </div>
       </nav>
 
-      {/* Category Sidebar - using createPortal */}
-      <CategorySidebar
-        isOpen={isSidebarOpen}
-
-      onToggle={setIsSidebarOpen}
-      />
+      {/* Category Sidebar - Only render if showShowAll is true */}
+      {navConfig.showShowAll && (
+        <CategorySidebar
+          isOpen={isSidebarOpen}
+          onToggle={setIsSidebarOpen}
+        />
+      )}
     </>
   );
 };

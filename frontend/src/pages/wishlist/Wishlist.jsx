@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+// import { useWishlist } from '../../../context/WishlistContext';
 import Button from '../../components/ui/Button/Button';
+import ProductCard from '../../components/ui/ProductCard/ProductCard'; // Adjust the import path as needed
 
 const Wishlist = () => {
   const [wishlistItems, setWishlistItems] = useState([
@@ -11,8 +13,11 @@ const Wishlist = () => {
       originalPrice: 119.99,
       image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300&h=400&fit=crop",
       brand: "SportStyle",
+      category: "Shoes",
       inStock: true,
-      colors: ['White', 'Black', 'Navy'],
+      isOutOfStock: false,
+      isOnSale: true,
+      colors: ['#FFFFFF', '#000000', '#000080'],
       sizes: ['US 8', 'US 9', 'US 10', 'US 11'],
       rating: 4.5,
       reviewCount: 128
@@ -23,8 +28,10 @@ const Wishlist = () => {
       price: 49.99,
       image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300&h=400&fit=crop",
       brand: "Luxe",
+      category: "Accessories",
       inStock: true,
-      colors: ['Brown', 'Black'],
+      isOutOfStock: false,
+      colors: ['#8B4513', '#000000'],
       rating: 4.8,
       reviewCount: 89
     },
@@ -35,8 +42,11 @@ const Wishlist = () => {
       originalPrice: 99.99,
       image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=400&fit=crop",
       brand: "UrbanWear",
+      category: "Clothing",
       inStock: false,
-      colors: ['Blue', 'Black'],
+      isOutOfStock: true,
+      isOnSale: true,
+      colors: ['#0000FF', '#000000'],
       sizes: ['S', 'M', 'L', 'XL'],
       rating: 4.3,
       reviewCount: 64
@@ -48,8 +58,11 @@ const Wishlist = () => {
       originalPrice: 249.99,
       image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300&h=400&fit=crop",
       brand: "TechStyle",
+      category: "Electronics",
       inStock: true,
-      colors: ['Silver', 'Black', 'Gold'],
+      isOutOfStock: false,
+      isOnSale: true,
+      colors: ['#C0C0C0', '#000000', '#FFD700'],
       rating: 4.6,
       reviewCount: 203
     }
@@ -93,6 +106,26 @@ const Wishlist = () => {
     selectedProducts.forEach(item => addToCart(item));
     removeSelectedItems();
   };
+
+  // Transform wishlist items to match ProductCard props
+  const transformedWishlistItems = wishlistItems.map(item => ({
+    ...item,
+    isOutOfStock: !item.inStock,
+    isOnSale: !!item.originalPrice,
+    // Convert color names to hex codes for ProductCard
+    colors: item.colors.map(color => {
+      const colorMap = {
+        'White': '#FFFFFF',
+        'Black': '#000000',
+        'Navy': '#000080',
+        'Brown': '#8B4513',
+        'Blue': '#0000FF',
+        'Silver': '#C0C0C0',
+        'Gold': '#FFD700'
+      };
+      return colorMap[color] || color;
+    })
+  }));
 
   if (wishlistItems.length === 0) {
     return (
@@ -164,10 +197,10 @@ const Wishlist = () => {
           )}
         </div>
 
-        {/* Wishlist Grid */}
+        {/* Wishlist Grid with ProductCard */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {wishlistItems.map((item) => (
-            <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow">
+          {transformedWishlistItems.map((item) => (
+            <div key={item.id} className="relative">
               {/* Selection Checkbox */}
               <div className="absolute top-3 left-3 z-10">
                 <input
@@ -188,95 +221,13 @@ const Wishlist = () => {
                 </svg>
               </button>
 
-              <Link to={`/product/${item.id}`} className="block">
-                {/* Product Image */}
-                <div className="relative">
-                  <img
-                    src={item.image}
-                    alt={item.name}
-                    className="w-full h-64 object-cover"
-                  />
-                  
-                  {/* Stock Status */}
-                  {!item.inStock && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                      <span className="bg-white text-gray-900 px-3 py-1 rounded-full text-sm font-medium">
-                        Out of Stock
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Sale Badge */}
-                  {item.originalPrice && (
-                    <div className="absolute top-3 left-12">
-                      <span className="bg-red-500 text-white px-2 py-1 text-xs rounded-md font-medium">
-                        SALE
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Product Info */}
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-1">{item.name}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{item.brand}</p>
-                  
-                  {/* Rating */}
-                  <div className="flex items-center space-x-1 mb-2">
-                    <div className="flex items-center">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`w-4 h-4 ${i < Math.floor(item.rating) ? 'text-yellow-400' : 'text-gray-300'}`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <span className="text-sm text-gray-600">({item.reviewCount})</span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-center space-x-2 mb-3">
-                    <span className="text-lg font-bold text-gray-900">${item.price}</span>
-                    {item.originalPrice && (
-                      <span className="text-sm text-gray-500 line-through">${item.originalPrice}</span>
-                    )}
-                  </div>
-
-                  {/* Available Colors */}
-                  {item.colors && (
-                    <div className="flex items-center space-x-2 mb-3">
-                      <span className="text-xs text-gray-600">Colors:</span>
-                      <div className="flex space-x-1">
-                        {item.colors.slice(0, 3).map((color, index) => (
-                          <span key={index} className="text-xs text-gray-500">
-                            {color}{index < Math.min(item.colors.length - 1, 2) && ','}
-                          </span>
-                        ))}
-                        {item.colors.length > 3 && (
-                          <span className="text-xs text-gray-500">+{item.colors.length - 3}</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </Link>
-
-              {/* Action Button */}
-              <div className="px-4 pb-4">
-                <Button
-                  variant={item.inStock ? "primary" : "outline"}
-                  size="medium"
-                  fullWidth
-                  onClick={() => item.inStock ? addToCart(item) : null}
-                  disabled={!item.inStock}
-                >
-                  {item.inStock ? "Add to Cart" : "Notify When Available"}
-                </Button>
-              </div>
+              <ProductCard
+                product={item}
+                onAddToCart={() => addToCart(item)}
+                // onAddToWishlist={() => removeFromWishlist(item.id)} // Since it's already in wishlist
+                showWishlist={false} // Hide wishlist button since we're in wishlist
+                className="h-full"
+              />
             </div>
           ))}
         </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-// import { useWishlist } from '../../../context/WishlistContext';
+
 import Button from '../Button/Button';
 import QuickViewModal from '../QuickView/QuickViewModal';
 
@@ -13,7 +13,7 @@ const ProductCard = ({
   showQuickView = true 
 }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-  // const { isInWishlist } = useWishlist();
+
 
   const {
     id,
@@ -33,22 +33,6 @@ const ProductCard = ({
   } = product;
 
   const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
-
-  // const handleAddToCart = (e) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   if (onAddToCart) {
-  //     onAddToCart(product);
-  //   }
-  // };
-
-  // const handleAddToWishlist = (e) => {
-  //   e.preventDefault();
-  //   e.stopPropagation();
-  //   if (onAddToWishlist) {
-  //     onAddToWishlist(product);
-  //   }
-  // };
 
   const handleQuickView = (e) => {
     e.preventDefault();
@@ -92,55 +76,18 @@ const ProductCard = ({
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            {showWishlist && (
-              <Button
-                variant="minimal"
-                size="small"
-                iconOnly
-                // onClick={handleAddToWishlist}
-                // className={`shadow-md hover:shadow-lg ${
-                //   isInWishlist(id) 
-                //     ? "bg-red-500 text-white hover:bg-red-600" 
-                //     : "bg-white hover:bg-neutral-50"
-                // }`}
-              >
-                {/* <svg className="w-4 h-4" fill={isInWishlist(id) ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg> */}
-              </Button>
-            )}
-            
-            {showQuickView && (
-              <Button
-                variant="minimal"
-                size="small"
-                iconOnly
-                onClick={handleQuickView}
-                className="bg-white shadow-md hover:shadow-lg"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              </Button>
-            )}
+      
+          {/* Quick View Button - Appears on Hover */}
+          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              variant="primary"
+              size="medium"
+              className="w-full shadow-lg"
+              onClick={handleQuickView}
+            >
+              Quick View
+            </Button>
           </div>
-
-          {/* Add to Cart Button - Appears on Hover */}
-          {!isOutOfStock && (
-            <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <Button
-                variant="primary"
-                size="medium"
-                className="w-full shadow-lg"
-                // onClick={handleAddToCart}
-              >
-                Add to Cart
-              </Button>
-            </div>
-          )}
         </div>
 
         {/* Product Info */}
@@ -224,20 +171,17 @@ const ProductCard = ({
             )}
           </div>
 
-          {/* Mobile Add to Cart Button */}
-          {!isOutOfStock && (
-            <Button
-              variant="primary"
-              size="medium"
-              className="w-full lg:hidden mt-2"
-              // onClick={handleAddToCart}
-            >
-              Add to Cart
-            </Button>
-          )}
+          {/* Mobile Quick View Button */}
+          <Button
+            variant="primary"
+            size="medium"
+            className="w-full lg:hidden mt-2"
+            onClick={handleQuickView}
+          >
+            Quick View
+          </Button>
         </div>
       </div>
-
 
       {/* Quick View Modal */}
       <QuickViewModal

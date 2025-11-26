@@ -19,6 +19,7 @@ const MainLayout = () => {
      
       // Remove navItems array so it uses default items which include the SHOW ALL button logic
     ],
+    showShowAll: true,
     showSearch: true,
     showUserAccount: true,
     showCart: true,

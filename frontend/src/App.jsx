@@ -7,6 +7,10 @@ import NotFound from './pages/NotFound';
 import MainLayout from './layouts/MainLayout';
 import ProductLayout from './layouts/ProductLayout';
 import ProductDetail from './pages/productDetail/ProductDetail';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import AuthLayout from './layouts/AuthLayout';
+
 
 
 
@@ -45,10 +49,10 @@ function App() {
                 </Route> */}
 
                 {/* Auth Layout - Login, Register */}
-                {/* <Route element={<AuthLayout />}>
+                <Route element={<AuthLayout />}>
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
-                </Route> */}
+                </Route>
                 <Route path="*" element={<NotFound />} />
             </Routes>  
           </div>
