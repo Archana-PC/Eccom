@@ -19,9 +19,7 @@ const Navbar = ({
     cartItemsCount: 0,
     showWishlist: true,
     wishlistItemsCount: 0,
-    // Add showShowAll config
-    showShowAll: true, // Control SHOW ALL button visibility
-    // Add auth-related config
+    showShowAll: true, 
     isLoggedIn: false,
     user: null // { firstName: "John", lastName: "Doe", email: "john@example.com" }
   },  
@@ -80,7 +78,7 @@ const Navbar = ({
                         <Button 
                           variant="primary"
                           size="medium"
-                          className='p-0! border-0! shadow-none!'  
+                          className='p-0! border-0! shadow-none!  hover:bg-neutral'  
                           icon={
                             <svg 
                               className="w-4 h-4 text-black" 
@@ -94,6 +92,13 @@ const Navbar = ({
                         >
                           <span className="text-black font-small">SHOW ALL</span>
                         </Button>
+
+                         {isSidebarOpen && (
+                          <div 
+                            className="absolute top-full left-0 w-full h-3  bg-transparent"
+                            onMouseEnter={handleSidebarOpen}
+                          />
+                        )}
                       </div>
                     )}
 

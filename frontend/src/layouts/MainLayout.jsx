@@ -25,7 +25,6 @@ const MainLayout = () => {
     showCart: true,
     cartItemsCount: 3,
     showWishlist: true,
-    wishlistItemsCount: 2
   };
 
   return (
