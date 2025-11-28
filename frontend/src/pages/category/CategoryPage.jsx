@@ -9,7 +9,7 @@ const CategoryPage = ({ category: propCategory, gender, filter }) => {
   const [searchParams] = useSearchParams();
   
   // Get context from CategoryLayout
-  const { 
+  const {  
     activeFilters = {}, 
     sortOption = 'newest',
     onFilterChange,

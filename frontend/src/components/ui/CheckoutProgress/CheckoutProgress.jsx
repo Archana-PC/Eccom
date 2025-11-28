@@ -38,9 +38,9 @@ const CheckoutProgress = ({
                   <span
                     className={`text-sm font-medium transition-colors duration-200 ${
                       isCompleted
-                        ? 'text-black-500'
+                        ? 'text-gray-900'
                         : isCurrent
-                        ? 'text-black-500 font-semibold'
+                        ? 'text-gray-900 font-semibold'
                         : 'text-gray-400'
                     }`}
                   >
@@ -48,17 +48,22 @@ const CheckoutProgress = ({
                   </span>
                   {/* Current Step Dot */}
                   {isCurrent && (
-                    <div className="w-1.5 h-1.5 bg-black-500 rounded-full mt-1" />
+                    <div className="w-1.5 h-1.5 bg-gray-900 rounded-full mt-1" />
                   )}
                 </div>
 
-                {/* Connector Line - Reduced Height */}
+                {/* Connector Line */}
                 {index < steps.length - 1 && (
-                  <div
-                    className={`flex-1 h-px mx-4 ${
-                      step.number < currentStep ? 'bg-black-500' : 'bg-gray-300'
-                    }`}
-                  />
+                  <div className="flex-1 mx-4 relative">
+                    {/* Background line */}
+                    <div className="w-full h-0.5 bg-gray-200"></div>
+                    {/* Progress line */}
+                    <div
+                      className={`absolute top-0 left-0 h-0.5 transition-all duration-500 ${
+                        step.number < currentStep ? 'bg-gray-900 w-full' : 'bg-gray-200 w-0'
+                      }`}
+                    ></div>
+                  </div>
                 )}
               </React.Fragment>
             );
@@ -89,16 +94,16 @@ const CheckoutProgress = ({
           {/* Mobile Security Badge */}
           <div className="flex items-center space-x-1 text-xs text-gray-600">
             <svg className="w-3 h-3 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
             </svg>
             <span>Secure</span>
           </div>
         </div>
         
-        {/* Mobile Progress Line - Reduced Height */}
-        <div className="w-full bg-gray-200 rounded-full h-0.5">
+        {/* Mobile Progress Line */}
+        <div className="w-full bg-gray-200 rounded-full h-1">
           <div
-            className="bg-black-500 h-0.5 rounded-full transition-all duration-300"
+            className="bg-gray-900 h-1 rounded-full transition-all duration-500"
             style={{
               width: `${((currentStep - 1) / (steps.length - 1)) * 100}%`
             }}
@@ -111,7 +116,7 @@ const CheckoutProgress = ({
             <span
               key={step.number}
               className={`text-xs ${
-                step.number <= currentStep ? 'text-black-500 font-medium' : 'text-gray-400'
+                step.number <= currentStep ? 'text-gray-900 font-medium' : 'text-gray-400'
               }`}
             >
               {step.label}
@@ -119,7 +124,6 @@ const CheckoutProgress = ({
           ))}
         </div>
       </div>
-    
     </div>
   );
 };
