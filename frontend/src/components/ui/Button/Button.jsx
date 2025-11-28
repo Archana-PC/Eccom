@@ -23,7 +23,7 @@ const Button = ({
     ghost: 'bg-transparent text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 focus:ring-neutral-400 active:bg-neutral-200 border-transparent',
     premium: 'bg-gradient-to-r from-accent-500 to-accent-600 text-white hover:from-accent-600 hover:to-accent-700 focus:ring-accent-400 active:from-accent-700 active:to-accent-800 shadow-md hover:shadow-lg border-accent-500',
     minimal: 'bg-transparent text-neutral-600 hover:bg-neutral-50 hover:text-neutral-800 focus:ring-neutral-400 border-transparent',
-    danger: 'bg-error-500 text-white hover:bg-error-600 focus:ring-error-400 active:bg-error-700 shadow-sm hover:shadow-md border-error-500 hover:border-error-600',
+    danger: 'bg-error-500 text-black hover:bg-error-600 focus:ring-error-400 active:bg-error-700 shadow-sm hover:shadow-md border-error-500 hover:border-error-600',
     success: 'bg-success-500 text-white hover:bg-success-600 focus:ring-success-400 active:bg-success-700 shadow-sm hover:shadow-md border-success-500 hover:border-success-600'
   };
 

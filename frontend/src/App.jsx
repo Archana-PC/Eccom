@@ -14,6 +14,7 @@ import AuthLayout from './layouts/AuthLayout';
 
 // Category Pages
 import CategoryPage from './pages/category/CategoryPage';
+import CheckoutLayout from './layouts/CheckoutLayout';
 
 function App() {
   return (
@@ -24,7 +25,7 @@ function App() {
           <Route element={<MainLayout />}>
             <Route index element={<Home />} />
             <Route path="wishlist" element={<Wishlist />} />
-            <Route path="cart" element={<Cart />} />
+            {/* <Route path="cart" element={<Cart />} /> */}
             {/* <Route path="/new-arrivals" element={<NewArrivals />} />
             <Route path="/account" element={<Account />} /> */}
           </Route>
@@ -50,10 +51,10 @@ function App() {
           </Route>
 
           {/* Checkout Layout - Cart & Checkout */}
-          {/* <Route element={<CheckoutLayout />}>
+          <Route element={<CheckoutLayout />}>
             <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-          </Route> */}
+            {/* <Route path="/checkout" element={<Checkout />} /> */}
+          </Route>
 
           {/* Auth Layout - Login, Register */}
           <Route element={<AuthLayout />}>
