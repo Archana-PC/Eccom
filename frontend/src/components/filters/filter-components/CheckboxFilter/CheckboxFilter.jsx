@@ -102,7 +102,7 @@ const CheckboxFilter = ({
         <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
         <div className="flex items-center gap-2">
           {selectedValues.length > 0 && (
-            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+            <span className="bg-grey-100 text-grey-800 text-xs px-2 py-1 rounded-full">
               {selectedValues.length}
             </span>
           )}
@@ -118,7 +118,7 @@ const CheckboxFilter = ({
               placeholder={`Search ${title.toLowerCase()}...`}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-grey-500 focus:border-transparent text-sm"
             />
             <svg
               className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
@@ -146,7 +146,7 @@ const CheckboxFilter = ({
             className={`text-xs font-medium px-3 py-1 rounded ${
               allFilteredSelected
                 ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                : 'bg-blue-500 text-white hover:bg-blue-600'
+                : 'bg-grey-500 text-black hover:bg-grey-600'
             }`}
           >
             Select All
@@ -175,7 +175,7 @@ const CheckboxFilter = ({
                   type="checkbox"
                   checked={selectedValues.includes(option.value)}
                   onChange={(e) => handleCheckboxChange(option.value, e.target.checked)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4 text-grey-600 focus:ring-grey-500 border-gray-300 rounded"
                 />
                 
                 {renderOptionContent(option)}
@@ -201,7 +201,7 @@ const CheckboxFilter = ({
         <div className="border-t border-gray-200 p-3">
           <button
             onClick={() => setShowAll(!showAll)}
-            className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="w-full text-center text-sm text-grey-600 hover:text-grey-700 font-medium"
           >
             {showAll ? `Show Less` : `Show ${filteredOptions.length - maxVisible} More`}
           </button>

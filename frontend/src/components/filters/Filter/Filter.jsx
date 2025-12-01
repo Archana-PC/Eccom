@@ -235,9 +235,9 @@ const Filter = ({
   );
 
   return (
-    <div className={`bg-white h-full overflow-hidden flex flex-col ${className}`}>
+    <div className={`bg-white  ${className}`}>
       {/* Filter Header */}
-      <div className="p-4 border-b border-gray-200 bg-white">
+      <div className="p-4 border-b border-gray-200 bg-white sticky top-0 z-10">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-gray-900">Filters</h2>
           {activeFiltersCount > 0 && (
@@ -268,7 +268,7 @@ const Filter = ({
                       const newValues = values.filter((_, i) => i !== index);
                       handleFilterChange(filterType, newValues);
                     }}
-                    className="ml-1 text-blue-600 hover:text-blue-800"
+                    className="ml-1 text-grey-600 hover:text-grey-800"
                   >
                     ×
                   </button>
@@ -280,7 +280,7 @@ const Filter = ({
       )}
 
       {/* Filter Groups */}
-      <div className="flex-1 overflow-y-auto">
+      
         <div className="space-y-4 p-4">
           {currentFilters.map((filterConfig, index) => (
             <FilterGroup
@@ -294,7 +294,7 @@ const Filter = ({
             />
           ))}
         </div>
-      </div>
+      
     </div>
   );
 };

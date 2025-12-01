@@ -11,7 +11,7 @@ const PriceRange = ({
   onChange,
   currency = '$',
   showInputs = true,
-  showPresets = true,
+  // showPresets = true,
   className = '',
   title = 'Price Range'
 }) => {
@@ -80,7 +80,7 @@ const PriceRange = ({
         />
 
         {/* Price Presets */}
-        {showPresets && (
+        {/* {showPresets && (
           <div className="space-y-3">
             <p className="text-sm font-medium text-gray-700">Quick select:</p>
             <div className="grid grid-cols-2 gap-2">
@@ -99,10 +99,10 @@ const PriceRange = ({
               ))}
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Custom Price Inputs (Alternative to RangeSlider inputs) */}
-        {showInputs && (
+        {/* {showInputs && (
           <div className="pt-4 border-t border-gray-100">
             <div className="flex items-end gap-4">
               <div className="flex-1">
@@ -140,7 +140,7 @@ const PriceRange = ({
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
