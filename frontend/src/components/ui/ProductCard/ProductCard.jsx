@@ -1,19 +1,20 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import useMediaQuery from "../../../hooks/useMediaQuery";
+import Button from "../Button/Button";
+import QuickViewModal from "../QuickView/QuickViewModal";
+import Rating from "../Rating/Rating";
 
-import Button from '../Button/Button';
-import QuickViewModal from '../QuickView/QuickViewModal';
-
-const ProductCard = ({ 
-  product, 
-  onAddToCart, 
+const ProductCard = ({
+  product,
+  onAddToCart,
   onAddToWishlist,
   className = "",
   showWishlist = true,
-  showQuickView = true 
+  showQuickView = true,
 }) => {
   const [isQuickViewOpen, setIsQuickViewOpen] = useState(false);
-
+  const isLargeScreen = useMediaQuery("(min-width: 1024px)");
 
   const {
     id,
@@ -29,29 +30,38 @@ const ProductCard = ({
     isOnSale = false,
     isOutOfStock = false,
     sizes = [],
-    colors = []
+    colors = [],
   } = product;
 
-  const discount = originalPrice ? Math.round(((originalPrice - price) / originalPrice) * 100) : 0;
+  const discount = originalPrice
+    ? Math.round(((originalPrice - price) / originalPrice) * 100)
+    : 0;
 
-  const handleQuickView = (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsQuickViewOpen(true);
-  };
+  // Only create quick view handlers if on large screen
+  const handleQuickView = isLargeScreen
+    ? (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsQuickViewOpen(true);
+      }
+    : undefined;
 
-  const handleCloseQuickView = () => {
-    setIsQuickViewOpen(false);
-  };
+  const handleCloseQuickView = isLargeScreen
+    ? () => {
+        setIsQuickViewOpen(false);
+      }
+    : undefined;
 
   return (
     <>
-      <div className={`group bg-white rounded-xl shadow-elegant border border-neutral-200 overflow-hidden hover:shadow-premium transition-all duration-300 ${className}`}>
+      <div
+        className={`group bg-white rounded-xl shadow-elegant border border-neutral-200 overflow-hidden hover:shadow-premium transition-all duration-300 ${className}`}
+      >
         {/* Product Image Container */}
         <div className="relative aspect-3/4 bg-neutral-100 overflow-hidden">
           <Link to={`/product/${id}`}>
-            <img 
-              src={image} 
+            <img
+              src={image}
               alt={name}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
@@ -75,19 +85,18 @@ const ProductCard = ({
               </span>
             )}
           </div>
-
-      
-          {/* Quick View Button - Appears on Hover */}
-          <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Button
-              variant="primary"
-              size="medium"
-              className="w-full shadow-lg"
-              onClick={handleQuickView}
-            >
-              Quick View
-            </Button>
-          </div>
+          {isLargeScreen && (
+            <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <Button
+                variant="primary"
+                size="medium"
+                className="w-full shadow-lg"
+                onClick={handleQuickView}
+              >
+                Quick View
+              </Button>
+            </div>
+          )}
         </div>
 
         {/* Product Info */}
@@ -111,31 +120,14 @@ const ProductCard = ({
             </h3>
           </Link>
 
-          {/* Rating */}
-          {rating && (
-            <div className="flex items-center space-x-1 mb-3">
-              <div className="flex">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <svg
-                    key={star}
-                    className={`w-4 h-4 ${
-                      star <= rating
-                        ? 'text-accent-500 fill-current'
-                        : 'text-neutral-300'
-                    }`}
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              {reviewCount && (
-                <span className="text-neutral-500 text-sm">
-                  ({reviewCount})
-                </span>
-              )}
-            </div>
+          {rating !== undefined && (
+            <Rating
+              rating={rating}
+              reviewCount={reviewCount}
+              size="sm"
+              className="mb-3"
+              showReviewCount={true}
+            />
           )}
 
           {/* Price */}
@@ -150,7 +142,7 @@ const ProductCard = ({
                 </span>
               )}
             </div>
-            
+
             {/* Color Swatches */}
             {colors.length > 0 && (
               <div className="flex space-x-1">
@@ -170,27 +162,15 @@ const ProductCard = ({
               </div>
             )}
           </div>
-
-          {/* Mobile Quick View Button */}
-          <Button
-            variant="primary"
-            size="medium"
-            className="w-full lg:hidden mt-2"
-            onClick={handleQuickView}
-          >
-            Quick View
-          </Button>
         </div>
       </div>
-
-      {/* Quick View Modal */}
-      <QuickViewModal
-        product={product}
-        isOpen={isQuickViewOpen}
-        onClose={handleCloseQuickView}
-        // onAddToCart={onAddToCart}
-        // onAddToWishlist={onAddToWishlist}
-      />
+      {isLargeScreen && (
+        <QuickViewModal
+          product={product}
+          isOpen={isQuickViewOpen}
+          onClose={handleCloseQuickView}
+        />
+      )}
     </>
   );
 };
