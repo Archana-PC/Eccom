@@ -12,7 +12,7 @@ const CategoryCardSkeleton = ({ variant = 'default' }) => {
     <div className="group cursor-pointer">
       <div className={`relative ${cardHeights[variant]} overflow-hidden rounded-2xl bg-gray-200 animate-pulse`}>
         {/* Image placeholder */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-300 to-gray-200"></div>
+        <div className="absolute inset-0 bg-linear-to-t from-gray-300 to-gray-200"></div>
         
         {/* Content placeholder */}
         <div className="absolute inset-0 flex flex-col justify-end p-6">

@@ -1,148 +1,204 @@
-import React, { useState, useEffect } from 'react';
-import CategoryGrid from '../../category/CategoryGrid/CategoryGrid';
-import Button from '../../ui/Button/Button';
-
+import React, { useState, useEffect, useRef } from "react";
+import Button from "../../ui/Button/Button";
 
 const CategoriesSection = ({
-  title = "SHOP BY CATEGORY",
-  subtitle = "Discover our complete collection designed for the modern man",
+  title = "Shop by Category",
+  subtitle = "",
   showAll = true,
-  maxCategories = 6,
-  variant = "default",
-  columns = 3,
+  maxCategories = null,
   className = "",
-  onCategoryClick,
-  onSubcategoryClick
+  onCategoryClick
 }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const sliderRef = useRef(null);
 
-  // Updated category data with better images
+  // Premium Journal-like Images
   const allCategories = [
     {
-      id: 'tops',
-      name: 'Tops',
-      icon: '👕',
-      description: 'Premium shirts, hoodies and casual wear for every occasion',
-      subcategories: ['T-Shirts', 'Polo Shirts', 'Casual Shirts', 'Formal Shirts', 'Hoodies', 'Sweaters'],
-      stats: { itemCount: 240, newItems: 12 },
-      badge: { text: 'Popular', variant: 'hot' }
+      id: "tops",
+      name: "Tops",
+      image:
+        "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&q=80",
+      products: 12,
     },
     {
-      id: 'bottoms',
-      name: 'Bottoms',
-      icon: '👖',
-      description: 'Perfect fit jeans, chinos and trousers in premium fabrics',
-      subcategories: ['Jeans', 'Casual Pants', 'Formal Trousers', 'Shorts', 'Joggers', 'Cargos'],
-      stats: { itemCount: 180, newItems: 8 }
+      id: "bottoms",
+      name: "Bottoms",
+      image:
+        "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?auto=format&fit=crop&w=600&q=80",
+      products: 9,
     },
     {
-      id: 'outerwear',
-      name: 'Outerwear',
-      icon: '🧥',
-      description: 'Stay stylish with our collection of jackets and coats',
-      subcategories: ['Jackets', 'Coats', 'Blazers', 'Bomber Jackets', 'Leather Jackets', 'Windbreakers'],
-      stats: { itemCount: 95, newItems: 15 },
-      badge: { text: 'New', variant: 'new' }
+      id: "outerwear",
+      name: "Outerwear",
+      image:
+        "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?auto=format&fit=crop&w=600&q=80",
+      products: 7,
     },
     {
-      id: 'footwear',
-      name: 'Footwear',
-      icon: '👟',
-      description: 'Step up your game with our premium shoe collection',
-      subcategories: ['Sneakers', 'Formal Shoes', 'Boots', 'Sandals', 'Loafers', 'Sports Shoes'],
-      stats: { itemCount: 160, newItems: 5 }
+      id: "footwear",
+      name: "Footwear",
+      image:
+        "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80",
+      products: 5,
     },
     {
-      id: 'accessories',
-      name: 'Accessories',
-      icon: '⌚',
-      description: 'Complete your look with carefully curated accessories',
-      subcategories: ['Watches', 'Belts', 'Wallets', 'Sunglasses', 'Hats', 'Bags'],
-      stats: { itemCount: 120, newItems: 3 }
+      id: "accessories",
+      name: "Accessories",
+      image:
+        "https://images.unsplash.com/photo-1556306535-0f09a537f0a3?auto=format&fit=crop&w=600&q=80",
+      products: 6,
     },
     {
-      id: 'activewear',
-      name: 'Activewear',
-      icon: '🏃',
-      description: 'Performance meets style in our activewear collection',
-      subcategories: ['Sports T-Shirts', 'Training Pants', 'Gym Shorts', 'Sports Jackets', 'Athletic Shoes'],
-      stats: { itemCount: 85, newItems: 7 },
-      badge: { text: 'Sale', variant: 'sale' }
-    }
+      id: "activewear",
+      name: "Activewear",
+      image:
+        "https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?auto=format&fit=crop&w=600&q=80",
+      products: 4,
+    },
+    {
+      id: "activewear",
+      name: "Activewear",
+      image:
+        "https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?auto=format&fit=crop&w=600&q=80",
+      products: 4,
+    },
+    {
+      id: "activewear2",
+      name: "Activewear",
+      image:
+        "https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?auto=format&fit=crop&w=600&q=80",
+      products: 4,
+    },
+    {
+      id: "activewear3",
+      name: "Activewear",
+      image:
+        "https://images.unsplash.com/photo-1516251193007-45ef944ab0c6?auto=format&fit=crop&w=600&q=80",
+      products: 4,
+    },
   ];
 
   useEffect(() => {
-    const loadCategories = () => {
-      setTimeout(() => {
-        const displayCategories = maxCategories 
-          ? allCategories.slice(0, maxCategories)
-          : allCategories;
-        setCategories(displayCategories);
-        setLoading(false);
-      }, 800);
-    };
+    setTimeout(() => {
+      const displayCategories = maxCategories
+        ? allCategories.slice(0, maxCategories)
+        : allCategories;
 
-    loadCategories();
+      setCategories(displayCategories);
+      setLoading(false);
+    }, 400);
   }, [maxCategories]);
 
-  const handleCategoryClick = (category, event) => {
-    console.log('Category clicked:', category);
-    if (onCategoryClick) {
-      onCategoryClick(category, event);
-    }
+  const scrollLeft = () => {
+    sliderRef.current.scrollBy({ left: -350, behavior: "smooth" });
   };
 
-  const handleSubcategoryClick = (subcategory, event) => {
-    console.log('Subcategory clicked:', subcategory);
-    if (onSubcategoryClick) {
-      onSubcategoryClick(subcategory, event);
-    }
+  const scrollRight = () => {
+    sliderRef.current.scrollBy({ left: 350, behavior: "smooth" });
   };
 
   return (
-    <section className={`py-20 lg:py-24 bg-gray-50 ${className}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16 lg:mb-20">
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
-            {title}
-          </h2>
-          {subtitle && (
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-              {subtitle}
-            </p>
-          )}
-        </div>
-
-        {/* Categories Grid */}
-        <CategoryGrid
-          categories={categories}
-          variant={variant}
-          columns={columns}
-          showSubcategories={false}
-          maxSubcategories={4}
-          loading={loading}
-          loadingCount={6}
-          onCategoryClick={handleCategoryClick}
-          onSubcategoryClick={handleSubcategoryClick}
-          className="mb-16"
-        />
-
-        {/* View All Categories Button */}
-        {showAll && !loading && (
-          <div className="text-center">
-            <Button
-              variant="outline"
-              size="large"
-              onClick={() => window.location.href = '/categories'}
-              className="px-10 py-4 text-lg font-medium border-2 border-gray-900 text-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-300"
-            >
-              View All Categories
-            </Button>
-          </div>
-        )}
+    <section className={`py-20 w-full bg-white ${className}`}>
+      {/* HEADER */}
+      <div className="text-center mb-10">
+        <h2 className="text-3xl font-bold text-gray-900">{title}</h2>
+        {subtitle && <p className="text-gray-500 mt-2">{subtitle}</p>}
       </div>
+
+      {/* FULL WIDTH WRAPPER */}
+      <div className="relative w-full">
+
+        {/* LEFT ARROW */}
+        <button
+          onClick={scrollLeft}
+          className="
+            absolute left-2 top-1/2 -translate-y-1/2 
+            bg-white shadow-xl p-3 rounded-full z-20 
+            hidden md:block
+          "
+        >
+          ❮
+        </button>
+
+        {/* RIGHT ARROW */}
+        <button
+          onClick={scrollRight}
+          className="
+            absolute right-2 top-1/2 -translate-y-1/2 
+            bg-white shadow-xl p-3 rounded-full z-20 
+            hidden md:block
+          "
+        >
+          ❯
+        </button>
+
+        {/* HORIZONTAL SCROLL AREA */}
+        <div
+          ref={sliderRef}
+          className="
+            flex gap-10 overflow-x-auto px-[calc((100vw-1280px)/2)] 
+            scrollbar-hide snap-x snap-mandatory py-4 
+          "
+          style={{ scrollBehavior: "smooth" }}
+        >
+          {/* LOADING PLACEHOLDERS */}
+          {loading &&
+            Array.from({ length: maxCategories }).map((_, i) => (
+              <div
+                key={i}
+                className="w-32 h-32 rounded-full bg-gray-200 animate-pulse shrink-0"
+              />
+            ))}
+
+          {/* CATEGORY SLIDES */}
+          {!loading &&
+            categories.map((cat) => (
+              <div
+                key={cat.id}
+                className="snap-center shrink-0 text-center cursor-pointer"
+                onClick={() => onCategoryClick?.(cat)}
+              >
+                {/* Circle Image */}
+                <div
+                  className="
+                    w-32 h-32 md:w-36 md:h-36 rounded-full 
+                    overflow-hidden shadow-lg hover:shadow-xl 
+                    hover:-translate-y-1 transition-all duration-300
+                    bg-gray-100
+                  "
+                >
+                  <img
+                    src={cat.image}
+                    alt={cat.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+
+                {/* Name */}
+                <p className="mt-3 text-sm font-semibold text-gray-800">
+                  {cat.name}
+                </p>
+
+              </div>
+            ))}
+        </div>
+      </div>
+
+      {/* VIEW ALL */}
+      {/* {showAll && !loading && (
+        <div className="text-center mt-10">
+          <Button
+            variant="outline"
+            size="medium"
+            className="border-[#006699] text-[#006699] hover:bg-[#006699] hover:text-white"
+            onClick={() => (window.location.href = "/categories")}
+          >
+            View All →
+          </Button>
+        </div>
+      )} */}
     </section>
   );
 };

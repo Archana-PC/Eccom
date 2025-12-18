@@ -1,73 +1,91 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import React from "react";
+import PropTypes from "prop-types";
 
 const Input = ({
   label,
-  type = 'text',
-  placeholder = '',
+  type = "text",
+  placeholder = "",
   value,
   onChange,
   disabled = false,
-  error = '',
-  success = '',
-  helperText = '',
+  error = "",
+  success = "",
+  helperText = "",
   required = false,
   fullWidth = true,
   prefixIcon,
   suffixIcon,
-  className = '',
+  className = "",
   ...props
 }) => {
-  const baseClasses = 'block rounded-lg border border-gray-300 px-4 py-3 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent';
-  
-  const stateClasses = error 
-    ? 'border-red-500 focus:ring-red-500' 
-    : success 
-    ? 'border-green-500 focus:ring-green-500' 
-    : 'border-gray-300';
+  const baseClasses = `
+    block rounded-lg px-4 py-3
+    transition-colors duration-200
+    focus:outline-none focus:ring-2
+    disabled:cursor-not-allowed disabled:opacity-50
+  `;
 
-  const disabledClasses = 'bg-gray-100 cursor-not-allowed opacity-50';
-  const widthClass = fullWidth ? 'w-full' : '';
+  /* 🎯 COLOR VIA CSS VARIABLES (SAFE) */
+  const inputStyle = {
+    backgroundColor: "var(--bg-page)",
+    color: "var(--text-primary)",
+    borderColor: "var(--border-default)",
+  };
 
-  const inputClasses = `
-    ${baseClasses}
-    ${stateClasses}
-    ${disabled ? disabledClasses : ''}
-    ${widthClass}
-    ${className}
-  `.trim();
+  if (error) {
+    inputStyle.borderColor = "#ef4444"; // red-500
+  } else if (success) {
+    inputStyle.borderColor = "#22c55e"; // green-500
+  }
+
+  const focusStyle = `
+    focus:ring-[var(--brand-primary)]
+    focus:border-transparent
+  `;
+
+  const widthClass = fullWidth ? "w-full" : "";
 
   return (
-    <div className={`${fullWidth ? 'w-full' : 'inline-block'}`}>
+    <div className={fullWidth ? "w-full" : "inline-block"}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label
+          className="block text-sm font-medium mb-2"
+          style={{ color: "var(--text-secondary)" }}
+        >
           {label}
-          {required && <span className="text-red-500 ml-1">*</span>}
+          {required && (
+            <span className="ml-1 text-red-500">*</span>
+          )}
         </label>
       )}
-      
+
       <div className="relative">
         {prefixIcon && (
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             {prefixIcon}
           </div>
         )}
-        
+
         <input
           type={type}
-          className={`
-            ${inputClasses}
-            ${prefixIcon ? 'pl-10' : ''}
-            ${suffixIcon ? 'pr-10' : ''}
-          `}
-          placeholder={placeholder}
           value={value}
           onChange={onChange}
+          placeholder={placeholder}
           disabled={disabled}
           required={required}
+          style={inputStyle}
+          className={`
+            ${baseClasses}
+            ${focusStyle}
+            ${widthClass}
+            ${prefixIcon ? "pl-10" : ""}
+            ${suffixIcon ? "pr-10" : ""}
+            border
+            ${className}
+          `}
           {...props}
         />
-        
+
         {suffixIcon && (
           <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
             {suffixIcon}
@@ -76,11 +94,16 @@ const Input = ({
       </div>
 
       {(error || success || helperText) && (
-        <p className={`mt-1 text-sm ${
-          error ? 'text-red-600' : 
-          success ? 'text-green-600' : 
-          'text-gray-500'
-        }`}>
+        <p
+          className="mt-1 text-sm"
+          style={{
+            color: error
+              ? "#ef4444"
+              : success
+              ? "#22c55e"
+              : "var(--text-muted)",
+          }}
+        >
           {error || success || helperText}
         </p>
       )}

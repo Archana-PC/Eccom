@@ -1,0 +1,38 @@
+/* =========================
+   SHARK PLUS COLORS
+========================= */
+
+:root {
+  /* BRAND */
+  --brand-primary: #006699;
+  --brand-secondary: #0099cc;
+  --brand-light: #e8f6ff;
+
+  /* TEXT */
+  --text-primary: #0f172a;
+  --text-secondary: #4a6370;
+  --text-muted: #64748b;
+
+  /* BACKGROUND */
+  --bg-page: #ffffff;
+  --bg-section: #f8fafc;
+
+  /* BORDER */
+  --border-default: #e2e8f0;
+}
+
+/* DARK MODE */
+.dark {
+  --brand-primary: #38bdf8;
+  --brand-secondary: #0ea5e9;
+  --brand-light: #0b3a53;
+
+  --text-primary: #e5e7eb;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --bg-page: #020617;
+  --bg-section: #020617;
+
+  --border-default: #1e293b;
+}

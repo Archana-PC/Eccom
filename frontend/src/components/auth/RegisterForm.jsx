@@ -1,159 +1,187 @@
-import React, { useState } from 'react';
-import Input from '../ui/Input/Input';
-import Button from '../ui/Button/Button';
+import React from "react";
+import Input from "../ui/Input/Input";
+import Button from "../ui/Button/Button";
 
-const RegisterForm = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    acceptTerms: false,
-  });
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
+const RegisterForm = ({
+  formData,
+  handleChange,
+  handleSubmit,
+  isLoading,
+  error,
+}) => {
+  const [errors, setErrors] = React.useState({});
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-    
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+  const validateForm = () => {
+    const newErrors = {};
+
+    if (!formData.firstName) newErrors.firstName = "First name is required";
+    if (!formData.lastName) newErrors.lastName = "Last name is required";
+    if (!formData.email) newErrors.email = "Email is required";
+
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 8) {
+      newErrors.password = "Password must be at least 8 characters";
     }
+
+    if (formData.password !== formData.password2) {
+      newErrors.password2 = "Passwords do not match";
+    }
+
+    if (!formData.acceptTerms) {
+      newErrors.acceptTerms = "Please accept the terms to continue";
+    }
+
+    return newErrors;
   };
 
-  const handleSubmit = async (e) => {
+  const onSubmit = (e) => {
     e.preventDefault();
-    setLoading(true);
-    
-    const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = 'First name is required';
-    if (!formData.lastName) newErrors.lastName = 'Last name is required';
-    if (!formData.email) newErrors.email = 'Email is required';
-    if (!formData.password) newErrors.password = 'Password is required';
-    if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
-    if (!formData.acceptTerms) newErrors.acceptTerms = 'You must accept the terms and conditions';
-    
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setLoading(false);
+
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
       return;
     }
 
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Register data:', formData);
-      // Handle successful registration
-    } catch (error) {
-      setErrors({ submit: error.message });
-    } finally {
-      setLoading(false);
-    }
+    setErrors({});
+    handleSubmit();
   };
 
   return (
-    <form className="space-y-6" onSubmit={handleSubmit}>
-      {errors.submit && (
-        <div className="bg-error-50 border border-error-200 rounded-xl p-4">
-          <p className="text-error-700 text-sm">{errors.submit}</p>
+    <div
+      className="max-w-lg mx-auto bg-white rounded-2xl p-8"
+      style={{ border: "1px solid var(--border-default)" }}
+    >
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h2
+          className="text-2xl font-semibold"
+          style={{ color: "var(--text-primary)" }}
+        >
+          Join the Style Club
+        </h2>
+        <p
+          className="mt-2 text-sm"
+          style={{ color: "var(--text-secondary)" }}
+        >
+          Be the first to discover new arrivals, exclusive offers, and style
+          inspiration.
+        </p>
+      </div>
+
+      {/* Form */}
+      <form className="space-y-5" onSubmit={onSubmit}>
+        <div className="grid grid-cols-2 gap-4">
+          <Input
+            label="First Name"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleChange}
+            error={errors.firstName}
+            required
+          />
+
+          <Input
+            label="Last Name"
+            name="lastName"
+            value={formData.lastName}
+            onChange={handleChange}
+            error={errors.lastName}
+            required
+          />
         </div>
-      )}
 
-      <div className="grid grid-cols-2 gap-4">
         <Input
-          label="First Name"
-          type="text"
-          name="firstName"
-          value={formData.firstName}
+          label="Email Address"
+          type="email"
+          name="email"
+          placeholder="you@example.com"
+          value={formData.email}
           onChange={handleChange}
-          error={errors.firstName}
-          placeholder="First name"
+          error={errors.email}
           required
         />
 
         <Input
-          label="Last Name"
-          type="text"
-          name="lastName"
-          value={formData.lastName}
+          label="Password"
+          type="password"
+          name="password"
+          placeholder="Create a password"
+          value={formData.password}
           onChange={handleChange}
-          error={errors.lastName}
-          placeholder="Last name"
+          error={errors.password}
           required
         />
-      </div>
 
-      <Input
-        label="Email Address"
-        type="email"
-        name="email"
-        value={formData.email}
-        onChange={handleChange}
-        error={errors.email}
-        placeholder="Enter your email"
-        required
-      />
-
-      <Input
-        label="Password"
-        type="password"
-        name="password"
-        value={formData.password}
-        onChange={handleChange}
-        error={errors.password}
-        placeholder="Create a password"
-        required
-      />
-
-      <Input
-        label="Confirm Password"
-        type="password"
-        name="confirmPassword"
-        value={formData.confirmPassword}
-        onChange={handleChange}
-        error={errors.confirmPassword}
-        placeholder="Confirm your password"
-        required
-      />
-
-      <div className="flex items-center">
-        <input
-          id="accept-terms"
-          name="acceptTerms"
-          type="checkbox"
-          checked={formData.acceptTerms}
+        <Input
+          label="Confirm Password"
+          type="password"
+          name="password2"
+          placeholder="Confirm your password"
+          value={formData.password2}
           onChange={handleChange}
-          className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-neutral-300 rounded"
+          error={errors.password2}
+          required
         />
-        <label htmlFor="accept-terms" className="ml-2 block text-sm text-neutral-700">
-          I agree to the{' '}
-          <a href="#" className="text-primary-600 hover:text-primary-700 font-semibold">
-            Terms and Conditions
-          </a>
-        </label>
-      </div>
-      {errors.acceptTerms && (
-        <p className="text-error-600 text-sm font-medium">{errors.acceptTerms}</p>
-      )}
 
-      <Button
-        type="submit"
-        variant="primary"
-        size="large"
-        loading={loading}
-        className="w-full"
-      >
-        Create Account
-      </Button>
-    </form>
+        {/* Terms */}
+        <div className="flex items-start gap-2">
+          <input
+            id="acceptTerms"
+            name="acceptTerms"
+            type="checkbox"
+            checked={formData.acceptTerms}
+            onChange={handleChange}
+            className="mt-1 h-4 w-4"
+            style={{ accentColor: "var(--brand-primary)" }}
+          />
+          <label
+            htmlFor="acceptTerms"
+            className="text-sm"
+            style={{ color: "var(--text-secondary)" }}
+          >
+            I agree to the{" "}
+            <span
+              className="cursor-pointer underline"
+              style={{ color: "var(--brand-primary)" }}
+            >
+              Terms & Conditions
+            </span>{" "}
+            and{" "}
+            <span
+              className="cursor-pointer underline"
+              style={{ color: "var(--brand-primary)" }}
+            >
+              Privacy Policy
+            </span>
+          </label>
+        </div>
+
+        {errors.acceptTerms && (
+          <p className="text-sm text-red-500">{errors.acceptTerms}</p>
+        )}
+
+        {/* CTA */}
+        <Button type="submit" loading={isLoading} fullWidth>
+          Create My Account
+        </Button>
+
+        {/* Footer text */}
+        <p
+          className="text-xs text-center mt-4"
+          style={{ color: "var(--text-muted)" }}
+        >
+          Already a member?{" "}
+          <span
+            className="cursor-pointer underline"
+            style={{ color: "var(--brand-primary)" }}
+          >
+            Sign in here
+          </span>
+        </p>
+      </form>
+    </div>
   );
 };
 

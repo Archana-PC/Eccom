@@ -15,7 +15,7 @@ const MainLayout = () => {
        { name: 'HOME', path: '/' },
       { name: 'NEW ARRIVALS', path: '/new-arrivals' },
       { name: 'CLOTHING', path: '/clothing' },
-      { name: 'BRANDS', path: '/brands' },
+
      
       // Remove navItems array so it uses default items which include the SHOW ALL button logic
     ],

@@ -15,9 +15,9 @@ import AuthLayout from './layouts/AuthLayout';
 // Category Pages
 import CategoryPage from './pages/category/CategoryPage';
 import CheckoutLayout from './layouts/CheckoutLayout';
-import Address from './pages/checkout/Address'
-import Payment from './pages/checkout/Payment';
 
+import Payment from './pages/checkout/Payment';
+import ProtectedRoute from './routes/ProtectedRoute';
 
 function App() {
   return (
@@ -26,7 +26,10 @@ function App() {
         {/* Main Layout - Home, Account, etc. */}
         <Route element={<MainLayout />}>
           <Route index element={<Home />} />
-          <Route path="wishlist" element={<Wishlist />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="wishlist" element={<Wishlist />} />
+          </Route>
         </Route>
 
         {/* Category Layout - Shopping Pages with Filters */}
@@ -56,8 +59,8 @@ function App() {
 
         {/* Checkout routes */}
         <Route path="/checkout" element={<CheckoutLayout />}>
-          <Route index element={<Address />} />
-          <Route path="address" element={<Address/>} />
+          {/* <Route index element={<Address />} /> */}
+          {/* <Route path="address" element={<Address/>} /> */}
           <Route path="payment" element={<Payment />} />
         </Route>
 
