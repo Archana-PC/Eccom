@@ -1,7 +1,7 @@
 // src/layouts/ProductLayout.jsx
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import Navbar from '../components/navbar/Navbar';
+import Navbar from '../user/components/navbar/Navbar';
 
 // import Breadcrumb from '../components/Breadcrumb';
 

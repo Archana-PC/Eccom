@@ -1,8 +1,8 @@
 // src/layouts/CheckoutLayout.jsx
 import React from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import CheckoutProgress from '../components/ui/CheckoutProgress/CheckoutProgress';
-import OrderSummary from '../components/ui/OrderSummary/OrderSummary';
+import CheckoutProgress from '../user/components/ui/CheckoutProgress/CheckoutProgress';
+import OrderSummary from '../user/components/ui/OrderSummary/OrderSummary';
 
 const CheckoutLayout = () => {
   const location = useLocation();
