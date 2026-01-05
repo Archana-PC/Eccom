@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import action
+
 
 from .serializers import (
     LoginSerializer,
@@ -151,22 +153,26 @@ class SignupView(APIView):
 
 
 class UserProfileView(APIView):
-    """
-    GET: Return current logged-in user details.
-    """
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
         user = request.user
-        return Response(
-            {
-                "id": user.id,
-                "email": user.email,
-                "full_name": user.full_name,
-                "employee_id": user.employee_id,
-               
-            }
-        )
+        role_group = user.role_group
+
+        return Response({
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "employee_id": user.employee_id,
+            "role": role_group.role if role_group else None,
+            "role_label": role_group.name if role_group else None,
+            "category": role_group.category.id if role_group and role_group.category else None,
+            "permissions": (
+                list(role_group.permissions.values_list("codename", flat=True))
+                if role_group else []
+            ),
+            "is_superadmin": user.is_superuser
+        })
 
 
 class PasswordResetRequestView(APIView):
@@ -190,7 +196,7 @@ class PasswordResetRequestView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = token_generator.make_token(user)
 
-        reset_url = f"{getattr(settings, 'FRONTEND_RESET_URL', 'http://localhost:3000/reset-password')}?uid={uid}&token={token}"
+        reset_url = f"{getattr(settings, 'FRONTEND_RESET_URL', 'http://localhost:8000/reset-password')}?uid={uid}&token={token}"
 
         send_mail(
             subject="Password Reset",
@@ -256,6 +262,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return [IsAuthenticated()]
 
 
+
 class AdminRoleViewSet(viewsets.ModelViewSet):
     queryset = AdminRole.objects.filter(is_active=True)
     serializer_class = AdminRoleSerializer
@@ -264,3 +271,13 @@ class AdminRoleViewSet(viewsets.ModelViewSet):
         if self.action in ["list", "retrieve"]:
             return [IsAuthenticated()]
         return [IsAuthenticated(), IsAdminOrSuperAdmin()]
+
+    @action(detail=True, methods=["put"], url_path="permissions")
+    def update_permissions(self, request, pk=None):
+        role = self.get_object()
+        permissions = request.data.get("permissions", [])
+
+        role.permissions.set(permissions)
+        role.save()
+
+        return Response({"message": "Permissions updated"})

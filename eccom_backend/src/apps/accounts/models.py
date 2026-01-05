@@ -1,5 +1,5 @@
 # src/apps/accounts/models.py
-from django.db import models
+from django.db import models,transaction, IntegrityError
 from django.contrib.auth.models import (
     AbstractBaseUser,
     PermissionsMixin,
@@ -11,6 +11,8 @@ import uuid
 
 from core.models import BaseModel   # your TimeStamped + UUID + SoftDelete
 from catalog.models import Category
+from django.db.models import Max, IntegerField
+from django.db.models.functions import Cast, Substr
 
 
 # ===========================================================
@@ -148,6 +150,7 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
         max_length=50,
         unique=True,
         null=True,
+        blank=True,
         help_text="Employee ID from HR/Company system.",
     )
 
@@ -246,17 +249,27 @@ class User(AbstractBaseUser, PermissionsMixin, BaseModel):
 
         return super().has_module_perms(app_label)
     def save(self, *args, **kwargs):
-    # Employee ID is only for staff
+        # normalize empty string
+        if self.employee_id == "":
+            self.employee_id = None
+
         if self.is_staff and not self.employee_id:
-            last_user = User.objects.exclude(employee_id__isnull=True).order_by("id").last()
-            number = 1
+            for _ in range(3):  # retry in rare race conditions
+                with transaction.atomic():
+                    qs = User.objects.select_for_update().filter(employee_id__startswith="EMP-")
 
-            if last_user and last_user.employee_id:
-                try:
-                    number = int(last_user.employee_id.split("-")[-1]) + 1
-                except:
-                    pass
+                    max_num = (
+                        qs.annotate(num=Cast(Substr("employee_id", 5), IntegerField()))
+                          .aggregate(m=Max("num"))
+                          .get("m")
+                    ) or 0
 
-            self.employee_id = f"EMP-{number:04d}"
+                    self.employee_id = f"EMP-{max_num + 1:04d}"
 
-        super().save(*args, **kwargs)
+                    try:
+                        return super().save(*args, **kwargs)
+                    except IntegrityError:
+                        self.employee_id = None
+                        continue
+
+        return super().save(*args, **kwargs)

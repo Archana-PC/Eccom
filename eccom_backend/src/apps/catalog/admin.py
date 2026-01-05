@@ -12,6 +12,23 @@ from approval_engine.models import Workflow, ApprovalInstance
 from approval_engine.utils import has_pending_approval
 
 
+
+class CategoryLevelFilter(admin.SimpleListFilter):
+    title = "Category Level"
+    parameter_name = "level"
+
+    def lookups(self, request, model_admin):
+        return (
+            ("main", "Main Categories"),
+            ("sub", "Sub Categories"),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == "main":
+            return queryset.filter(parent__isnull=True)
+        if self.value() == "sub":
+            return queryset.filter(parent__isnull=False)
+        return queryset
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
      list_display = (
@@ -24,7 +41,7 @@ class CategoryAdmin(admin.ModelAdmin):
         "display_order",
         "is_active",
     )
-     list_filter = ("category_type", "is_active")
+     list_filter = (CategoryLevelFilter, "category_type", "is_active")
      search_fields = ("name",)
      ordering = ("display_order", "name")
      prepopulated_fields = {"slug": ("name",)}
@@ -148,8 +165,44 @@ class ProductAdmin(admin.ModelAdmin):
         "category",
         "brand",
         "is_active",
+        "is_featured",
+        "is_best_seller",
+        "show_on_home",
         "submit_for_approval_button",
     )
+
+    list_filter = (
+    "is_active",
+    "is_featured",
+    "is_best_seller",
+    "show_on_home",
+    "category",
+    )
+
+    fieldsets = (
+    ("Basic Info", {
+        "fields": (
+            "name",
+            "category",
+            "brand",
+            "is_active",
+        )
+    }),
+    ("Home Page Settings", {
+        "fields": (
+            "show_on_home",
+            "is_featured",
+            "is_best_seller",
+        )
+    }),
+    ("SEO", {
+        "fields": (
+            "meta_title",
+            "meta_description",
+        )
+    }),
+)
+
     
     inlines = (ProductVariantInline, ProductImageInline)
 

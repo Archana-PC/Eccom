@@ -2,6 +2,10 @@ from django.utils.text import slugify
 import random
 import string
 
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+
 def generate_unique_slug(instance, value, slug_field_name="slug"):
     """
     Generate a unique slug for any model instance.
@@ -34,3 +38,36 @@ def generate_random_code(length=8, prefix=''):
     chars = string.ascii_uppercase + string.digits
     random_part = ''.join(random.choice(chars) for _ in range(length))
     return f"{prefix}{random_part}"
+
+
+# for imaze resizer
+IMAGE_SIZES = {
+    "thumb": (300, 65),
+    "card": (600, 70),
+    "zoom": (1200, 75),
+}
+
+CATEGORY_IMAGE_SIZES = {
+    "thumb": (120, 85),   # mobile circle
+    "card": (240, 85),    # grid / home
+    "banner": (600, 85),  # future banner
+}
+
+def resize_image(image, max_width, quality):
+    img = Image.open(image)
+    img = img.convert("RGB")
+
+    if img.width > max_width:
+        ratio = max_width / img.width
+        height = int(img.height * ratio)
+        img = img.resize((max_width, height), Image.LANCZOS)
+
+    buffer = BytesIO()
+    img.save(
+        buffer,
+        format="WEBP",
+        quality=quality,
+        optimize=True
+    )
+
+    return ContentFile(buffer.getvalue())

@@ -79,6 +79,8 @@ class ApprovalAction(models.Model):
             ("submit", "Submit"),
             ("approve", "Approve"),
             ("reject", "Reject"),
+            ("comment", "Comment"), 
+            ("resubmit", "Resubmit"),
         ],
     )
 

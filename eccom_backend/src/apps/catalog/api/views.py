@@ -1,8 +1,13 @@
 # catalog/views.py
 from rest_framework import viewsets, permissions
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny, IsAdminUser
+from django.shortcuts import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.decorators import action
-from ..models import Category, Brand, Product, ProductVariant, ProductImage,Collection
+from ..models import Category, Brand, Product, ProductVariant, ProductImage,Collection,Style,Color,Fabric,Material
 from .serializers import (
     CategorySerializer,
     CategoryTreeSerializer,
@@ -10,7 +15,13 @@ from .serializers import (
     ProductSerializer,
     ProductVariantSerializer,
     ProductImageSerializer,
-    CollectionSerializer
+    CollectionSerializer,
+    ProductCardSerializer,
+    StyleSerializer,
+    ColorSerializer,
+    FabricSerializer,
+    MaterialSerializer,
+    
 )
 
 
@@ -25,90 +36,128 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         return bool(request.user and request.user.is_staff)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class PublicCategoryViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [IsAdminOrReadOnly]
 
-    # --------------------------
-    # MAIN QUERYSET HANDLING
-    # --------------------------
     def get_queryset(self):
-        parent = self.request.query_params.get("parent", None)
+        # ✅ Default categories endpoint: ONLY ROOT
+        if self.action == "list":
+            return Category.objects.filter(is_active=True, parent__isnull=True)
 
-        # 1) If ?parent= is NOT passed → return ROOT categories
-        if parent is None:
-            return Category.objects.filter(parent__isnull=True, is_active=True)
+        # ✅ Tree action will handle its own queryset
+        if self.action == "tree":
+            return Category.objects.none()
 
-        # 2) If ?parent=ID → return subcategories of that parent
-        return Category.objects.filter(parent_id=parent, is_active=True)
+        # ✅ Optional: for retrieve, allow fetching any active category by id
+        return Category.objects.filter(is_active=True)
 
-    # --------------------------
-    # SERIALIZER SELECTION
-    # --------------------------
     def get_serializer_class(self):
-        """
-        We do NOT return tree in the default list response.
-        /categories/ → should return only root categories
-        /categories/?parent=ID → should return only subcategories
-        /categories/tree/ → will return the full tree
-        """
+        # ✅ Use tree serializer only for /categories/tree/
+        if self.action == "tree":
+            return CategoryTreeSerializer
         return CategorySerializer
 
-    # --------------------------
-    # CATEGORY TREE (FULL)
-    # --------------------------
     @action(detail=False, methods=["get"])
     def tree(self, request):
-        """
-        Get ALL categories nested recursively.
-        """
-        roots = Category.objects.filter(parent__isnull=True, is_active=True)
+        # ✅ FULL tree: roots + nested children
+        roots = Category.objects.filter(is_active=True, parent__isnull=True)
         serializer = CategoryTreeSerializer(roots, many=True)
         return Response(serializer.data)
 
-    # --------------------------
-    # PRODUCTS UNDER CATEGORY + SUBCATEGORIES
-    # --------------------------
-    @action(detail=True, methods=["get"])
-    def products(self, request, pk=None):
+class AdminCategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all().order_by("display_order", "name")
+    serializer_class = CategorySerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = "pk"
+
+    @action(detail=False, methods=["get"], url_path="roots")
+    def roots(self, request):
         """
-        /categories/<id>/products/
-        Returns all products for:
-        - This category
-        - Its children
-        - Grandchildren
-        - Infinite nested levels
+        /api/admin/categories/roots/
+        Returns ALL ROOT categories (no pagination) - for dropdown.
         """
-        category = self.get_object()
-
-        # Recursive function to collect all descendant IDs
-        def collect(cat):
-            ids = [cat.id]
-            for child in cat.children.filter(is_active=True):
-                ids.extend(collect(child))
-            return ids
-
-        category_ids = collect(category)
-
-        # Fetch products under ALL collected categories
-        products = Product.objects.filter(
-            category_id__in=category_ids,
-            is_active=True
-        )
-
-        # Pagination support
-        page = self.paginate_queryset(products)
-        if page is not None:
-            serializer = ProductSerializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        # No pagination
-        serializer = ProductSerializer(products, many=True)
+        qs = self.get_queryset().filter(parent__isnull=True)
+        serializer = self.get_serializer(qs, many=True)
         return Response(serializer.data)
 
-class CollectionViewSet(viewsets.ModelViewSet):
+# PUBLIC (store / website): slug + only active + read-only
+class PublicColorViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Color.objects.filter(is_active=True).order_by("name")
+    serializer_class = ColorSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
+
+
+# ADMIN (dashboard): pk + all records + full CRUD
+class AdminColorViewSet(viewsets.ModelViewSet):
+    queryset = Color.objects.all().order_by("name")     # ✅ admin sees active+inactive
+    serializer_class = ColorSerializer
+    permission_classes = [IsAdminUser]                 # or your IsAdminOrSuperAdmin, etc.
+    lookup_field = "pk"  
+
+# ---------- FABRIC ----------
+class PublicFabricViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Fabric.objects.filter(is_active=True).order_by("name")
+    serializer_class = FabricSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
+
+class AdminFabricViewSet(viewsets.ModelViewSet):
+    queryset = Fabric.objects.all().order_by("name")
+    serializer_class = FabricSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = "pk"
+
+# ---------- MATERIAL ----------
+class PublicMaterialViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Material.objects.filter(is_active=True).order_by("name")
+    serializer_class = MaterialSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
+
+class AdminMaterialViewSet(viewsets.ModelViewSet):
+    queryset = Material.objects.all().order_by("name")
+    serializer_class = MaterialSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = "pk"
+
+# ---------- STYLE ----------
+class PublicStyleViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Style.objects.filter(is_active=True).order_by("name")
+    serializer_class = StyleSerializer
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
+
+    @action(detail=True, methods=["get"])
+    def products(self, request, slug=None):
+        style = self.get_object()
+
+        # safest (works even if related_name is not set)
+        qs = (
+            Product.objects.filter(is_active=True, style=style)
+            .select_related("category", "brand", "style")
+            .prefetch_related("variants", "images")
+        )
+
+        # return light card serializer (better for listing)
+        page = self.paginate_queryset(qs)
+        if page is not None:
+            ser = ProductCardSerializer(page, many=True, context={"request": request})
+            return self.get_paginated_response(ser.data)
+
+        ser = ProductCardSerializer(qs, many=True, context={"request": request})
+        return Response(ser.data)
+class AdminStyleViewSet(viewsets.ModelViewSet):
+    queryset = Style.objects.all().order_by("name")
+    serializer_class = StyleSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = "pk"
+# ---------- COLLECTION ----------
+class PublicCollectionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Collection.objects.filter(is_active=True)
     serializer_class = CollectionSerializer
-    lookup_field = "slug"   # <— IMPORTANT
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
 
     @action(detail=True, methods=["get"])
     def products(self, request, slug=None):
@@ -116,6 +165,12 @@ class CollectionViewSet(viewsets.ModelViewSet):
         products = collection.products.filter(is_active=True)
         serializer = ProductSerializer(products, many=True)
         return Response(serializer.data)
+
+class AdminCollectionViewSet(viewsets.ModelViewSet):
+    queryset = Collection.objects.all()
+    serializer_class = CollectionSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = "pk"
 
 
 
@@ -126,51 +181,149 @@ class BrandViewSet(viewsets.ModelViewSet):
 
 
 
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Product.objects.filter(is_active=True)
-        .select_related("category", "brand")
-        .prefetch_related("variants", "images")
-    )
+class PublicProductViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = ProductSerializer
-    lookup_field = 'slug'
+    permission_classes = [AllowAny]
+    lookup_field = "slug"
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = (
+            Product.objects.filter(is_active=True)
+            .select_related("category", "brand")
+            .prefetch_related("variants", "images")
+        )
 
-        # Filter by category slug
-        category_slug = self.request.query_params.get('category')
+        # same category filter logic you already wrote
+        category_slug = self.request.query_params.get("category")
         if category_slug:
-            qs = qs.filter(category__slug=category_slug)
-
-        # Filter by category (ID) including subcategories
-        category_id = self.request.query_params.get('category_id')
-        if category_id:
             try:
-                category = Category.objects.get(id=category_id, is_active=True)
+                category = Category.objects.get(slug=category_slug, is_active=True)
             except Category.DoesNotExist:
                 return qs.none()
 
-            # Recursively find children
             def collect_ids(cat):
                 ids = [cat.id]
                 for child in cat.children.filter(is_active=True):
                     ids.extend(collect_ids(child))
                 return ids
 
-            category_ids = collect_ids(category)
-            qs = qs.filter(category_id__in=category_ids)
+            qs = qs.filter(category_id__in=collect_ids(category))
 
         return qs
+    
+class AdminProductViewSet(viewsets.ModelViewSet):
+    serializer_class = ProductSerializer
+    permission_classes = [IsAdminUser]
+    lookup_field = "pk"  # ✅ UUID primary key
+    parser_classes = [MultiPartParser, FormParser, JSONParser]  # ✅ for size_chart_image
 
+    def get_queryset(self):
+        return (
+            Product.objects.all()  # ✅ admin sees active + inactive
+            .select_related("category", "brand")
+            .prefetch_related("variants", "images")
+            .order_by("-created_at")
+        )
 
+class CategoryProductsView(APIView):
+    """
+    GET /api/categories/<slug>/products/?page=1&page_size=20
+    Returns products from category + all subcategories (paginated)
+    """
+
+    def get(self, request, slug):
+        # 1) Get category by slug
+        category = get_object_or_404(Category, slug=slug, is_active=True)
+
+        # 2) Collect category + subcategory ids (same as yours)
+        def collect_ids(cat):
+            ids = [cat.id]
+            for child in cat.children.filter(is_active=True):
+                ids.extend(collect_ids(child))
+            return ids
+
+        category_ids = collect_ids(category)
+
+        # 3) Product queryset (same, but add ordering for stable paging)
+        qs = (
+            Product.objects.filter(is_active=True, category_id__in=category_ids)
+            .select_related("category", "brand")
+            .prefetch_related("variants", "images")
+            .order_by("-created_at")  # ✅ important for consistent pages
+        )
+
+        # 4) ✅ Pagination (this is the new part)
+        paginator = PageNumberPagination()
+        paginator.page_size_query_param = "page_size"  # allow ?page_size=20
+
+        page = paginator.paginate_queryset(qs, request, view=self)
+
+        serializer = ProductCardSerializer(
+            page,
+            many=True,
+            context={"request": request}
+        )
+
+        return paginator.get_paginated_response(serializer.data)
+    
 class ProductVariantViewSet(viewsets.ModelViewSet):
     queryset = ProductVariant.objects.select_related("product").all()
     serializer_class = ProductVariantSerializer
     permission_classes = [IsAdminOrReadOnly]
 
-
 class ProductImageViewSet(viewsets.ModelViewSet):
-    queryset = ProductImage.objects.select_related("product").all()
+    queryset = (
+        ProductImage.objects
+        .select_related("product")
+        .order_by("sort_order")
+    )
     serializer_class = ProductImageSerializer
     permission_classes = [IsAdminOrReadOnly]
+    parser_classes = [MultiPartParser, FormParser]
+
+class HomeProductsAPIView(APIView):
+    def get(self, request):
+        qs = Product.objects.filter(
+            is_active=True,
+            show_on_home=True
+        ).select_related(
+            "brand", "category"
+        ).prefetch_related(
+            "variants", "images"
+        )
+
+        serializer_context = {"request": request}
+
+        return Response({
+            "sections": [
+                {
+                    "key": "new_arrivals",
+                    "title": "New Arrivals",
+                    "products": ProductCardSerializer(
+                        qs.filter(is_new_arrival=True)[:6],
+                        many=True,
+                        context=serializer_context
+                    ).data,
+                },
+                {
+                    "key": "featured",
+                    "title": "Featured Products",
+                    "products": ProductCardSerializer(
+                        qs.filter(is_featured=True)[:6],
+                        many=True,
+                        context=serializer_context
+                    ).data,
+                },
+                {
+                    "key": "trending",
+                    "title": "Trending Now",
+                    "products": ProductCardSerializer(
+                        qs.filter(is_best_seller=True)[:6],
+                        many=True,
+                        context=serializer_context
+                    ).data,
+                },
+            ]
+        })
+
+

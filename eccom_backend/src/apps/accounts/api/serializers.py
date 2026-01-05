@@ -16,18 +16,32 @@ User = get_user_model()
 # ===========================================================
 
 class LoginSerializer(TokenObtainPairSerializer):
-     username_field = "email"
+    username_field = "email"
 
-     def validate(self, attrs):
+    def validate(self, attrs):
         data = super().validate(attrs)
 
-        # 🔑 attach authenticated user info
+        role_group = self.user.role_group
+
+        # auto-map Django superuser → super_admin
+        if not role_group and self.user.is_superuser:
+            role_group = AdminRole.objects.filter(role="super_admin").first()
+
         data["user"] = {
             "id": self.user.id,
             "email": self.user.email,
+            "role": role_group.role if role_group else "customer",
+            "role_label": role_group.name if role_group else "Customer",
+
+            # 🔥 CORRECT serialization
+            "permissions": (
+                list(role_group.permissions.values_list("codename", flat=True))
+                if role_group else []
+            ),
         }
 
         return data
+
 
 
 # ===========================================================
@@ -104,7 +118,22 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 # ADMIN ROLE
 # ===========================================================
 
+from django.contrib.auth.models import Permission
+from rest_framework import serializers
+from accounts.models import AdminRole
+
+
 class AdminRoleSerializer(serializers.ModelSerializer):
+    # input (frontend sends list of codenames)
+    permissions = serializers.ListField(
+        child=serializers.CharField(),
+        write_only=True,
+        required=False
+    )
+
+    # output (API returns list of codenames)
+    permission_codenames = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = AdminRole
         fields = [
@@ -112,11 +141,49 @@ class AdminRoleSerializer(serializers.ModelSerializer):
             "name",
             "role",
             "category",
-            "permissions",
-            "created_at",
-            "updated_at",
+            "permissions",           # write-only input
+            "permission_codenames",  # read-only output
         ]
-        read_only_fields = ["created_at", "updated_at"]
+
+    def get_permission_codenames(self, obj):
+        return list(obj.permissions.values_list("codename", flat=True))
+
+    def validate_permissions(self, value):
+        if not value:
+            return []
+
+        found = Permission.objects.filter(codename__in=value)
+        found_codenames = set(found.values_list("codename", flat=True))
+
+        missing = set(value) - found_codenames
+        if missing:
+            raise serializers.ValidationError(
+                f"Invalid permissions: {', '.join(sorted(missing))}"
+            )
+        return value
+
+    def create(self, validated_data):
+        permission_codenames = validated_data.pop("permissions", [])
+        role = AdminRole.objects.create(**validated_data)
+
+        if permission_codenames:
+            perms = Permission.objects.filter(codename__in=permission_codenames)
+            role.permissions.set(perms)
+
+        return role
+
+    def update(self, instance, validated_data):
+        permission_codenames = validated_data.pop("permissions", None)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        if permission_codenames is not None:
+            perms = Permission.objects.filter(codename__in=permission_codenames)
+            instance.permissions.set(perms)
+
+        return instance
 
 
 # ===========================================================
@@ -170,8 +237,9 @@ class UserCreateUpdateSerializer(serializers.ModelSerializer):
             "role_group",
             "is_active",
             "is_staff",
+            "employee_id",
         ]
-        read_only_fields = ["employee_id"]
+        read_only_fields = ["employee_id","id"]
 
     def create(self, validated_data):
         password = validated_data.pop("password")

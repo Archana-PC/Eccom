@@ -3,7 +3,10 @@ from django.db import models
 from django.utils.text import slugify
 from core.utils import generate_unique_slug
 from core.models import BaseModel
+from django.core.exceptions import ValidationError
 from catalog.constants import FIT_CHOICES,PATTERN_CHOICES,SLEEVE_CHOICES,COLLAR_CHOICES
+
+import os
 
 class Category(BaseModel):
     name = models.CharField(max_length=100, unique=True)
@@ -19,6 +22,13 @@ class Category(BaseModel):
 
     # NOTE: is_active inherited from BaseModel (soft delete flag)
 
+ # 🔹 MAIN CATEGORY IMAGE
+    image = models.ImageField(
+        upload_to="categories/",
+        blank=True,
+        null=True,
+        help_text="Only required for main (root) categories"
+    )
      # Category classification for future expansion
     CATEGORY_TYPE_CHOICES = [
         ('CLOTHING', 'Clothing'),
@@ -67,7 +77,50 @@ class Category(BaseModel):
             self.requires_size_chart = True
 
         super().save(*args, **kwargs)
+    def clean(self):
+        if self.is_root and not self.image:
+            raise ValidationError({
+                'image': 'Main category must have an image.'
+            })
 
+class Style(BaseModel):
+    """
+    Product style master (client requirement):
+    e.g. OXFORD SHIRT, TWILL SHIRT, SHARK POLO, CHINOS etc.
+    """
+    name = models.CharField(max_length=150)
+    slug = models.SlugField(max_length=180, unique=True, blank=True)
+
+    # optional: client code like "MOUNT", "MAI", "METRIC"
+    code = models.CharField(max_length=50, unique=True, null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["name"],
+                condition=models.Q(is_active=True),
+                name="uniq_active_style_name"
+            )
+        ]
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        self.name = (self.name or "").strip()
+        if self.code:
+            self.code = self.code.strip().upper()
+
+        if not self.slug:
+            # prefer code in slug if available, else use name
+            base = self.code or self.name
+            self.slug = generate_unique_slug(self, base, "slug")
+
+        super().save(*args, **kwargs)
 
 class Collection(BaseModel):
     name = models.CharField(max_length=120, unique=True)
@@ -166,10 +219,19 @@ class Product(BaseModel):
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=220, unique=True, blank=True)
 
+    
     category = models.ForeignKey(
         Category,
         on_delete=models.PROTECT,
         related_name="products",
+    )
+    style = models.ForeignKey(
+        "Style",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="products",
+        help_text="Client style like OXFORD SHIRT / TWILL SHIRT etc."
     )
 
     collections = models.ManyToManyField(
@@ -290,6 +352,27 @@ class Product(BaseModel):
 
     meta_title = models.CharField(max_length=255, blank=True)
     meta_description = models.CharField(max_length=255, blank=True)
+
+     # 🔥 HOME PAGE FLAGS
+    is_featured = models.BooleanField(
+        default=False,
+        help_text="Show this product in Featured section on Home page"
+    )
+
+    is_new_arrival = models.BooleanField(
+        default=False,
+        help_text="Mark product as New Arrival on Home page"
+    )
+
+    is_best_seller = models.BooleanField(
+        default=False,
+        help_text="Show this product in Best Sellers section on Home page"
+    )
+
+    show_on_home = models.BooleanField(
+        default=True,
+        help_text="Master switch to control home page visibility"
+    )
 
     class Meta:
         ordering = ["name"]
@@ -414,7 +497,7 @@ class ProductImage(BaseModel):
         on_delete=models.CASCADE,
         related_name="images",
     )
-    image = models.ImageField(upload_to="products/")
+    image = models.ImageField(upload_to="products/original/")
     alt_text = models.CharField(max_length=255, blank=True)
     is_main = models.BooleanField(default=False)
     sort_order = models.PositiveIntegerField(default=0)
@@ -425,9 +508,11 @@ class ProductImage(BaseModel):
     def __str__(self):
         return f"Image for {self.product.name}"
 
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
+ 
 
-        # Ensure only one main image per product
-        if self.is_main:
-            self.product.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)
+def save(self, *args, **kwargs):
+    super().save(*args, **kwargs)
+
+    # Ensure only one main image per product
+    if self.is_main:
+        self.product.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)

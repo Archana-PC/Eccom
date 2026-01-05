@@ -3,10 +3,8 @@ from approval_engine.models import ApprovalInstance, ApprovalAction
 
 
 class ApprovalActionSerializer(serializers.ModelSerializer):
-    performed_by_name = serializers.CharField(
-        source="performed_by.get_full_name",
-        read_only=True
-    )
+    performed_by_name = serializers.CharField(source="performed_by.full_name", read_only=True)
+
 
     class Meta:
         model = ApprovalAction
@@ -56,3 +54,9 @@ class ApprovalSubmitSerializer(serializers.Serializer):
 
 class ApprovalDecisionSerializer(serializers.Serializer):
     comment = serializers.CharField(required=False, allow_blank=True)
+
+from rest_framework import serializers
+
+class ApprovalCommentSerializer(serializers.Serializer):
+    comment = serializers.CharField(required=True, allow_blank=False)
+
