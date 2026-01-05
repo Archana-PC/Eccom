@@ -98,6 +98,16 @@ const UserForm = ({
       className="bg-white border rounded-xl p-5 space-y-4"
     >
       <FormField
+        label="EmployeeId"
+        name="employee_id"
+        value={form.employee_id}
+        placeholder="user@example.com"
+        autoComplete="off"
+        disabled
+        error={errors.email}
+      />
+
+      <FormField
         label="Email"
         name="email"
         type="email"

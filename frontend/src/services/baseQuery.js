@@ -12,7 +12,7 @@ export const baseQueryWithReauth = async (args, api, extraOptions) => {
   if (result?.error?.status === 401) {
     // try refresh
     const refreshResult = await rawBaseQuery(
-      { url: '/auth/refresh/', method: 'POST' },
+      { url: 'auth/refresh/', method: 'POST' },
       api,
       extraOptions
     )

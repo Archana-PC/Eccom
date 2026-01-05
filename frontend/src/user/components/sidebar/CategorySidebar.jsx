@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 import { useNavigate } from "react-router-dom";
 import Button from "../../../shared/Button/Button";
-import { useGetCategoryTreeQuery } from "../../../services/catalog/catalogApi";
+import { useGetCategoryTreeQuery } from "../../services/catalog/catalogApi";
+
 
 
 const CategorySidebar = ({ isOpen, onToggle }) => {

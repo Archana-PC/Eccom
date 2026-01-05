@@ -1,16 +1,24 @@
-import { useMemo } from "react";
+import { useMemo,useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Permission from "../../components/ui/Permission";
 import Table from "../../components/ui/Table";
 import PageHeader from "../../components/ui/PageHeader";
 import { useGetUsersQuery } from "../../services/adminApi";
 import AdminButton from "../../components/ui/AdminButton";
+import AdminPagination from "../../components/ui/AdminPagination";
 
 const UsersList = () => {
   const navigate = useNavigate();
+  const [page, setPage] = useState(1);
+const [pageSize, setPageSize] = useState(20);
 
-  const { data, isLoading, isError, error, refetch, isFetching } =
-    useGetUsersQuery(undefined, { refetchOnMountOrArgChange: true });
+const { data, isLoading, isError, error, refetch, isFetching} = useGetUsersQuery({ page, page_size: pageSize });
+
+const tableData = data?.results ?? [];
+const total = data?.count ?? 0;
+
+  // const { data, isLoading, isError, error, refetch, isFetching } =
+  //   useGetUsersQuery(undefined, { refetchOnMountOrArgChange: true });
 
   // ✅ normalize response
   const users = useMemo(() => {
@@ -22,6 +30,7 @@ const UsersList = () => {
   }, [data]);
 
   const columns = [
+    { key: "employee_id", label: "Employee ID", render: (row) => row?.employee_id ?? "—" },
     { key: "full_name", label: "Full Name" },
     { key: "email", label: "Email" },
     {
@@ -66,7 +75,9 @@ const UsersList = () => {
       render: (row) => (
         <div className="flex gap-2">
           <Permission action="change" entity="user">
-            <AdminButton size="sm" onClick={() => navigate(`/admin/users/${row.id}`)}>
+            <AdminButton size="sm" 
+            variant="secondary"
+            onClick={() => navigate(`/admin/users/${row.id}`)}>
               Edit
             </AdminButton>
           </Permission>
@@ -119,9 +130,22 @@ const UsersList = () => {
         </div>
       )}
 
-      {!isLoading && !isError && users.length > 0 && (
-        <Table columns={columns} data={users} />
-      )}
+     {!isLoading && !isError && tableData.length > 0 && (
+             <>
+               <Table columns={columns} data={tableData} />
+     
+               {/* ✅ Pagination UI */}
+               <div className="pt-3">
+                 <AdminPagination
+                   page={page}
+                   pageSize={pageSize}
+                   total={total}
+                   onPageChange={setPage}
+                   onPageSizeChange={setPageSize}
+                 />
+               </div>
+             </>
+           )}
     </div>
   );
 };

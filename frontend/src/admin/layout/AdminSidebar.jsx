@@ -18,7 +18,20 @@ export default function AdminSidebar({
   // ✅ if mobile drawer is open, don't collapse labels
   const effectiveCollapsed = mobileOpen ? false : collapsed;
 
-  const canSee = (perm) => isSuperAdmin || !perm || permissions.includes(perm);
+  // const canSee = (perm) => isSuperAdmin || !perm || permissions.includes(perm);
+ 
+  // ✅ supports permission: string | string[] | null
+const canSee = (perm) => {
+  if (isSuperAdmin) return true;
+  if (!perm) return true;
+
+  // if you pass multiple permissions, allow if ANY one matches
+  if (Array.isArray(perm)) {
+    return perm.some((p) => permissions.includes(p));
+  }
+
+  return permissions.includes(perm);
+};
 
   const visibleSidebar = useMemo(() => {
     return sidebar

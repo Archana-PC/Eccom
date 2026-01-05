@@ -5,14 +5,20 @@ import Permission from "../../components/ui/Permission";
 import PageHeader from "../../components/ui/PageHeader";
 import Table from "../../components/ui/Table";
 import AdminButton from "../../components/ui/AdminButton";
+import AdminPagination from "../../components/ui/AdminPagination";
 
 const Roles = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  
+  const { data, isLoading, isError, error, refetch, isFetching  } = useGetRolesQuery({ page, page_size: pageSize });
 
-  // ✅ Fetch roles from backend
-  const { data, isLoading, isError, error, refetch, isFetching } =
-    useGetRolesQuery();
+  const rows = data?.results ?? [];
+  const total = data?.count ?? 0;
+
+ 
 
   // ✅ Optional: local delete hide (UI only)
   const [deletedIds, setDeletedIds] = useState(new Set());
@@ -123,7 +129,8 @@ const Roles = () => {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Roles & Permissions"
+        
+        subtitle={`Total: ${total}`}
         actions={
           <div className="flex gap-2">
             <AdminButton
@@ -173,7 +180,20 @@ const Roles = () => {
 
       {/* ✅ Table */}
       {!isLoading && !isError && tableData.length > 0 && (
-        <Table columns={columns} data={tableData} />
+        <>
+          <Table columns={columns} data={tableData} />
+
+          {/* ✅ Pagination UI */}
+          <div className="pt-3">
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          </div>
+        </>
       )}
     </div>
   );

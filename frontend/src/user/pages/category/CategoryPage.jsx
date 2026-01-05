@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useOutletContext, useSearchParams } from "react-router-dom";
 import ProductGrid from "../../components/ui/ProductCard/ProductGrid";
-import { useGetProductsByCategorySlugQuery } from "../../../services/catalog/catalogApi";
+import { useGetProductsByCategorySlugQuery } from "../../services/catalog/catalogApi";
+
 
 
 // import Pagination from '../../components/ui/Pagination/Pagination';
@@ -119,7 +120,7 @@ const CategoryPage = ({ category: propCategory, gender, filter }) => {
       </div>
 
       {/* Products Grid using ProductCard */}
-      <ProductGrid products={products}
+      <ProductGrid products={products?.results}
       loading={loading}
       // onFilterChange={handleFilterChange}
       />

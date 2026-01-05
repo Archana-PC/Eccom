@@ -3,17 +3,24 @@ import { useNavigate, useLocation } from "react-router-dom";
 
 import PageHeader from "../../components/ui/PageHeader";
 import Table from "../../components/ui/Table";
-import Button from "../../../shared/Button/Button";
 import Permission from "../../components/ui/Permission";
+import AdminButton from "../../components/ui/AdminButton";
+import AdminPagination from "../../components/ui/AdminPagination"; // ✅ add this
+import { useGetAdminCategoriesQuery } from "../../services/catalog/adminCategoryApi";
 
-import { useGetCategoriesQuery } from "../../../services/catalog/catalogApi";
+
 
 const Categories = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // ✅ pagination state
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+
+  // ✅ fetch with paging
   const { data, isLoading, isError, error, refetch, isFetching } =
-    useGetCategoriesQuery();
+    useGetAdminCategoriesQuery({ page, page_size: pageSize });
 
   // ✅ Optional: local delete hide (UI only)
   const [deletedIds, setDeletedIds] = useState(new Set());
@@ -21,33 +28,25 @@ const Categories = () => {
   // ✅ Refetch after coming back from create page
   useEffect(() => {
     if (location.state?.newCategory) {
+      setPage(1);          // ✅ go to first page
       refetch();
       window.history.replaceState({}, document.title);
     }
   }, [location.state, refetch]);
 
-  // ✅ Normalize API response -> always an array
-  const categories = useMemo(() => {
-    if (!data) return [];
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data?.results)) return data.results;
-    if (Array.isArray(data?.data)) return data.data;
-    return [];
-  }, [data]);
+  // ✅ IMPORTANT: with DRF pagination use results
+  const categories = useMemo(() => data?.results ?? [], [data]);
+
+  // ✅ total count from backend
+  const total = data?.count ?? 0;
 
   // ✅ Apply local delete filter
   const tableData = useMemo(() => {
     return categories.filter((c) => !deletedIds.has(c.id));
   }, [categories, deletedIds]);
 
-  // ✅ helper: show parent name safely (depends on your backend shape)
   const renderParent = (row) => {
-    const parent =
-      row?.parent_name ??
-      row?.parent?.name ??
-      row?.parent ??
-      null;
-
+    const parent = row?.parent_name ?? row?.parent?.name ?? row?.parent ?? null;
     if (!parent) return <span className="text-gray-400">—</span>;
     return <span>{parent}</span>;
   };
@@ -75,16 +74,17 @@ const Categories = () => {
       render: (row) => (
         <div className="flex gap-2">
           <Permission action="change" entity="category">
-            <Button
+            <AdminButton
               size="sm"
+              variant="secondary"
               onClick={() => navigate(`/admin/categories/${row.id}`)}
             >
               Edit
-            </Button>
+            </AdminButton>
           </Permission>
 
           <Permission action="delete" entity="category">
-            <Button
+            <AdminButton
               variant="danger"
               size="sm"
               onClick={() =>
@@ -96,7 +96,7 @@ const Categories = () => {
               }
             >
               Delete
-            </Button>
+            </AdminButton>
           </Permission>
         </div>
       ),
@@ -104,34 +104,35 @@ const Categories = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       <PageHeader
-        title="Categories"
+        
+        subtitle={`Total: ${total}`}
         actions={
           <div className="flex gap-2">
-            <Button
+            <AdminButton
               variant="secondary"
               onClick={() => refetch()}
               disabled={isFetching}
             >
               {isFetching ? "Refreshing..." : "Refresh"}
-            </Button>
+            </AdminButton>
 
             <Permission action="add" entity="category">
-              <Button onClick={() => navigate("/admin/categories/create")}>
+              <AdminButton onClick={() => navigate("/admin/categories/create")}>
                 + Add Category
-              </Button>
+              </AdminButton>
             </Permission>
           </div>
         }
       />
 
-      {/* ✅ Loading */}
+      {/* Loading */}
       {isLoading && (
         <div className="p-4 rounded-lg border bg-white">Loading categories...</div>
       )}
 
-      {/* ✅ Error */}
+      {/* Error */}
       {isError && (
         <div className="p-4 rounded-lg border bg-white">
           <div className="font-semibold text-red-600">Failed to load categories</div>
@@ -139,12 +140,12 @@ const Categories = () => {
             {error?.data?.detail || error?.error || "Unknown error"}
           </div>
           <div className="mt-3">
-            <Button onClick={() => refetch()}>Try again</Button>
+            <AdminButton onClick={() => refetch()}>Try again</AdminButton>
           </div>
         </div>
       )}
 
-      {/* ✅ Empty */}
+      {/* Empty */}
       {!isLoading && !isError && tableData.length === 0 && (
         <div className="p-6 rounded-lg border bg-white text-center">
           <div className="text-lg font-semibold">No categories found</div>
@@ -154,9 +155,22 @@ const Categories = () => {
         </div>
       )}
 
-      {/* ✅ Table */}
+      {/* Table */}
       {!isLoading && !isError && tableData.length > 0 && (
-        <Table columns={columns} data={tableData} />
+        <>
+          <Table columns={columns} data={tableData} />
+
+          {/* ✅ Pagination UI */}
+          <div className="pt-3">
+            <AdminPagination
+              page={page}
+              pageSize={pageSize}
+              total={total}
+              onPageChange={setPage}
+              onPageSizeChange={setPageSize}
+            />
+          </div>
+        </>
       )}
     </div>
   );

@@ -1,102 +1,45 @@
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCreateCategoryMutation, useGetCategoriesQuery } from "../../services/adminCategoryApi";
-import Button from "../../../shared/Button/Button";
+import PageHeader from "../../components/ui/PageHeader";
+import Permission from "../../components/ui/Permission";
+import CategoryForm from "./CategoryForm";
+import {
+  useCreateCategoryMutation,
+  useGetAdminCategoriesQuery,
+ 
+} from "../../services/catalog/adminCategoryApi";
 
-
-
-const CreateCategory = () => {
+const CreateCategoryPage = () => {
   const navigate = useNavigate();
 
-  const { data: categories, isFetching } = useGetCategoriesQuery();
-  const [createCategory, { isLoading }] = useCreateCategoryMutation();
+  const { data: categoriesData, isFetching: catsFetching } = useGetAdminCategoriesQuery();
+  const [createCategory, { isLoading, isError, error }] = useCreateCategoryMutation();
 
-  // ✅ normalize categories -> array
-  const categoryList = (() => {
-    if (!categories) return [];
-    if (Array.isArray(categories)) return categories;
-    if (Array.isArray(categories?.results)) return categories.results;
-    if (Array.isArray(categories?.data)) return categories.data;
-    return [];
-  })();
-
-  const [form, setForm] = useState({
-    name: "",
-    parent: "",
-    is_active: true,
-  });
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const payload = {
-      name: form.name,
-      parent: form.parent ? Number(form.parent) : null,
-      is_active: !!form.is_active,
-    };
-
+  const handleCreate = async (payload) => {
     try {
       await createCategory(payload).unwrap();
       navigate("/admin/categories", { state: { newCategory: true } });
-    } catch (err) {
-      console.error("Create category failed", err);
-    }
+    } catch (e) {}
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="max-w-5xl bg-white p-6 rounded-xl shadow space-y-6"
-    >
-      <h2 className="text-xl font-semibold">Create Category</h2>
+    <div className="space-y-6">
+      <PageHeader title="Create Category" />
 
-      {/* NAME */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Category Name</label>
-        <input
-          className="w-full border rounded px-3 py-2"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          required
-        />
-      </div>
-
-      {/* PARENT (optional) */}
-      <div>
-        <label className="block text-sm font-medium mb-1">Parent Category</label>
-        <select
-          className="w-full border rounded px-3 py-2"
-          value={form.parent}
-          onChange={(e) => setForm({ ...form, parent: e.target.value })}
-          disabled={isFetching}
-        >
-          <option value="">None</option>
-          {categoryList.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      {/* ACTIVE */}
-      <label className="flex items-center gap-2 font-medium">
-        <input
-          type="checkbox"
-          checked={form.is_active}
-          onChange={(e) => setForm({ ...form, is_active: e.target.checked })}
-        />
-        Active
-      </label>
-
-      {/* ACTION */}
-      <div className="flex justify-end">
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? "Saving..." : "Create Category"}
-        </Button>
-      </div>
-    </form>
+      {/* ✅ Permission is mandatory */}
+      <Permission action="add" entity="category">
+        <div className="max-w-2xl">
+          <CategoryForm
+            categoriesData={categoriesData}
+            submitLabel="Create Category"
+            loading={isLoading || catsFetching}
+            apiError={isError ? error : null}
+            onSubmit={handleCreate}
+            onCancel={() => navigate(-1)}
+          />
+        </div>
+      </Permission>
+    </div>
   );
 };
 
-export default CreateCategory;
+export default CreateCategoryPage;

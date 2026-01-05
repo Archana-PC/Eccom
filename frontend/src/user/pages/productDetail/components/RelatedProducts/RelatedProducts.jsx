@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import ProductCard from '../../../../components/ui/ProductCard/ProductCard';
 
 
 
@@ -208,7 +209,7 @@ const RelatedProducts = ({ currentProductId, category, brand }) => {
         {/* Related Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {relatedProducts.map((product) => (
-            <ProductCard
+          <ProductCard
               key={product.id}
               product={product}
               onAddToCart={handleAddToCart}

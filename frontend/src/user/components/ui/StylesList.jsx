@@ -25,7 +25,7 @@ const StylesList = ({
 
       {/* GRID */}
       <div className={`grid ${gridCols[columns]} gap-4 md:gap-6`}>
-        {styles.map((item, index) => (
+        {styles?.results?.map((item, index) => (
           <div
             key={index}
             className="

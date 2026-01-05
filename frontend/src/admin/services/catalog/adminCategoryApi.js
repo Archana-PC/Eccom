@@ -1,20 +1,26 @@
-import { api } from "../../services/api";
+import { api } from "../../../services/api";
 
 export const adminCategoryApi = api.injectEndpoints({
   endpoints: (builder) => ({
+    getAdminCategories: builder.query({
+  query: ({ page = 1, page_size = 10 } = {}) =>
+    `/admin/categories/?page=${page}&page_size=${page_size}`,
+  providesTags: ["AdminCategories"],
+}),
 
-    getCategories: builder.query({
-      query: () => "categories/",
-      providesTags: ["Categories"],
-    }),
+getAdminRootCategories: builder.query({
+  query: () =>
+    `/admin/categories/roots/`,
+  providesTags: ["AdminCategories"],
+}),
 
     getCategoryById: builder.query({
-      query: (id) => `categories/${id}/`,
+      query: (id) => `/admin/categories/${id}/`,
     }),
 
     createCategory: builder.mutation({
       query: (data) => ({
-        url: "categories/",
+        url: "/admin/categories/",
         method: "POST",
         body: data,
       }),
@@ -23,7 +29,7 @@ export const adminCategoryApi = api.injectEndpoints({
 
     updateCategory: builder.mutation({
       query: ({ id, ...data }) => ({
-        url: `categories/${id}/`,
+        url: `/admin/categories/${id}/`,
         method: "PUT",
         body: data,
       }),
@@ -32,7 +38,7 @@ export const adminCategoryApi = api.injectEndpoints({
 
     deleteCategory: builder.mutation({
       query: (id) => ({
-        url: `categories/${id}/`,
+        url: `/admin/categories/${id}/`,
         method: "DELETE",
       }),
       invalidatesTags: ["Categories"],
@@ -42,7 +48,8 @@ export const adminCategoryApi = api.injectEndpoints({
 });
 
 export const {
-  useGetCategoriesQuery,
+  useGetAdminCategoriesQuery,
+  useGetAdminRootCategoriesQuery,
   useGetCategoryByIdQuery,
   useCreateCategoryMutation,
   useUpdateCategoryMutation,

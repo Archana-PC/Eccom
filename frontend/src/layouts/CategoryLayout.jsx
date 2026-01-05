@@ -5,7 +5,10 @@ import Navbar from '../user/components/navbar/Navbar';
 import MobileFilterModal from '../user/components/filters/Filter/MobileFilterModal';
 import Filter from '../user/components/filters/Filter/Filter'
 import CategoryRibbon from '../user/components/ui/CategoryRibbon/CategoryRibbon'
-import { useGetCategoriesQuery } from '../services/catalog/catalogApi';
+
+import CategoryRibbonContainer from '../user/components/ui/CategoryRibbon/CategoryRibbonContainer';
+import { useGetCategoriesQuery } from '../user/services/catalog/catalogApi';
+
 
 
 const CategoryLayout = () => {
@@ -63,11 +66,11 @@ const CategoryLayout = () => {
           showWishlist: true,
         }}
       />
-       <CategoryRibbon
-              categories={categories?.results}
-              showSaleBadge={true}
-              saleBadgeText="Limited Time Offer"
-            />
+      <CategoryRibbonContainer
+  showSaleBadge={true}
+  saleBadgeText="Limited Time Offer"
+  pageSize={10}
+/>
       
       {/* FIXED: Added max-w-full and removed horizontal padding */}
       <div className="flex flex-1 w-full max-w-full">

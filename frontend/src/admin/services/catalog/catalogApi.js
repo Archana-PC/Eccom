@@ -1,8 +1,64 @@
-import { api } from "../../../services/api"; // adjust if your path differs
+import { api } from "../../../services/api"; 
 
 export const catalogApi = api.injectEndpoints({
   endpoints: (builder) => ({
-    /* ---------------- PRODUCTS ---------------- */
+    /* ---------------- ADMIN PRODUCTS (UUID / ID based) ---------------- */
+    getAdminProducts: builder.query({
+  // ✅ now supports pagination by default
+  // usage: useGetAdminProductsQuery({ page: 1, page_size: 20, search: "", ordering: "-created_at" })
+  query: ({ page = 1, page_size = 20, ...rest } = {}) => ({
+    url: "admin/products/",
+    params: { page, page_size, ...rest },
+  }),
+
+  providesTags: (res) => {
+    const results = Array.isArray(res) ? res : (res?.results ?? []);
+    return results.length
+      ? [
+          ...results.map((p) => ({ type: "Product", id: p.id })),
+          { type: "Product", id: "LIST" },
+        ]
+      : [{ type: "Product", id: "LIST" }];
+  },
+}),
+
+    getAdminProductById: builder.query({
+      query: (id) => `admin/products/${id}/`,
+      providesTags: (r, e, id) => [{ type: "Product", id }],
+    }),
+
+    // ✅ body can be JSON OR FormData (FormData needed when uploading size_chart_image)
+    createAdminProduct: builder.mutation({
+      query: (body) => ({
+        url: "admin/products/",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: [{ type: "Product", id: "LIST" }],
+    }),
+
+    // ✅ IMPORTANT: use { id, body } so you can pass FormData safely
+    updateAdminProduct: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `admin/products/${id}/`,
+        method: "PATCH",
+        body, // JSON or FormData
+      }),
+      invalidatesTags: (r, e, { id }) => [
+        { type: "Product", id },
+        { type: "Product", id: "LIST" },
+      ],
+    }),
+
+    deleteAdminProduct: builder.mutation({
+      query: (id) => ({
+        url: `admin/products/${id}/`,
+        method: "DELETE",
+      }),
+      invalidatesTags: [{ type: "Product", id: "LIST" }],
+    }),
+
+    /* ---------------- PUBLIC PRODUCTS (Slug-based, optional for storefront) ---------------- */
     getProducts: builder.query({
       query: (params) => ({
         url: "products/",
@@ -17,38 +73,9 @@ export const catalogApi = api.injectEndpoints({
           : [{ type: "Product", id: "LIST" }],
     }),
 
-    getProductById: builder.query({
-      query: (id) => `products/${id}/`,
-      providesTags: (r, e, id) => [{ type: "Product", id }],
-    }),
-
-    createProduct: builder.mutation({
-      query: (data) => ({
-        url: "products/",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: [{ type: "Product", id: "LIST" }],
-    }),
-
-    updateProduct: builder.mutation({
-      query: ({ id, ...patch }) => ({
-        url: `products/${id}/`,
-        method: "PATCH",
-        body: patch,
-      }),
-      invalidatesTags: (r, e, { id }) => [
-        { type: "Product", id },
-        { type: "Product", id: "LIST" },
-      ],
-    }),
-
-    deleteProduct: builder.mutation({
-      query: (id) => ({
-        url: `products/${id}/`,
-        method: "DELETE",
-      }),
-      invalidatesTags: [{ type: "Product", id: "LIST" }],
+    getProductBySlug: builder.query({
+      query: (slug) => `products/${slug}/`,
+      providesTags: (r, e, slug) => [{ type: "Product", id: slug }],
     }),
 
     /* ---------------- VARIANTS ---------------- */
@@ -75,7 +102,7 @@ export const catalogApi = api.injectEndpoints({
       query: (data) => ({
         url: "variants/",
         method: "POST",
-        body: data,
+        body: data, // must include product: <UUID> for connection
       }),
       invalidatesTags: [{ type: "Variant", id: "LIST" }],
     }),
@@ -122,9 +149,10 @@ export const catalogApi = api.injectEndpoints({
 
     // ✅ Assumes backend accepts: product (uuid), variant (uuid optional), image (file), alt_text, is_main, sort_order
     createImage: builder.mutation({
-      query: ({ product, variant, imageFile, alt_text, is_main, sort_order }) => {
+      query: ({ product_id, variant, imageFile, alt_text, is_main, sort_order }) => {
+        console.log("Creating image:", { product_id, variant, alt_text, is_main, sort_order });
         const fd = new FormData();
-        if (product) fd.append("product", product);
+        if (product_id) fd.append("product_id", product_id);
         if (variant) fd.append("variant", variant);
         if (alt_text != null) fd.append("alt_text", alt_text);
         if (is_main != null) fd.append("is_main", String(is_main));
@@ -141,9 +169,9 @@ export const catalogApi = api.injectEndpoints({
     }),
 
     updateImage: builder.mutation({
-      query: ({ id, product, variant, imageFile, alt_text, is_main, sort_order }) => {
+      query: ({ id, product_id, variant, imageFile, alt_text, is_main, sort_order }) => {
         const fd = new FormData();
-        if (product) fd.append("product", product);
+        if (product_id) fd.append("product_id", product_id);
         if (variant) fd.append("variant", variant);
         if (alt_text != null) fd.append("alt_text", alt_text);
         if (is_main != null) fd.append("is_main", String(is_main));
@@ -175,18 +203,25 @@ export const catalogApi = api.injectEndpoints({
 });
 
 export const {
-  useGetProductsQuery,
-  useGetProductByIdQuery,
-  useCreateProductMutation,
-  useUpdateProductMutation,
-  useDeleteProductMutation,
+  // ✅ ADMIN products (use these in admin panel)
+  useGetAdminProductsQuery,
+  useGetAdminProductByIdQuery,
+  useCreateAdminProductMutation,
+  useUpdateAdminProductMutation,
+  useDeleteAdminProductMutation,
 
+  // (optional) Public products
+  useGetProductsQuery,
+  useGetProductBySlugQuery,
+
+  // Variants
   useGetVariantsQuery,
   useGetVariantByIdQuery,
   useCreateVariantMutation,
   useUpdateVariantMutation,
   useDeleteVariantMutation,
 
+  // Images
   useGetImagesQuery,
   useGetImageByIdQuery,
   useCreateImageMutation,

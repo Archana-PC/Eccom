@@ -83,5 +83,37 @@ export const PERMISSIONS = {
     CHANGE: "change_productimage",
     DELETE: "delete_productimage",
   },
+    // 🔹 STYLE
+  STYLE: {
+    VIEW: "view_style",
+    ADD: "add_style",
+    CHANGE: "change_style",
+    DELETE: "delete_style",
+  },
+
+  // 🔹 COLOR
+  COLOR: {
+    VIEW: "view_color",
+    ADD: "add_color",
+    CHANGE: "change_color",
+    DELETE: "delete_color",
+  },
+
+  // 🔹 FABRIC
+  FABRIC: {
+    VIEW: "view_fabric",
+    ADD: "add_fabric",
+    CHANGE: "change_fabric",
+    DELETE: "delete_fabric",
+  },
+
+  // 🔹 MATERIAL
+  MATERIAL: {
+    VIEW: "view_material",
+    ADD: "add_material",
+    CHANGE: "change_material",
+    DELETE: "delete_material",
+  },
+
 
 };
