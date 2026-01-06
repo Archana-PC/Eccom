@@ -47,11 +47,11 @@ const StylesRibbon = ({ styles = [] }) => {
   };
 
   return (
-    <div className="w-full border-b border-border bg-bg-section/70 backdrop-blur supports-[backdrop-filter]:bg-bg-section/60">
+    <div className="w-full border-b border-border bg-bg-section/70 backdrop-blur supports-backdrop-filter:bg-bg-section/60">
       <div className="relative max-w-7xl mx-auto px-3">
         {/* Fade edges */}
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-bg-section to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-bg-section to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-linear-to-r from-bg-section to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-bg-section to-transparent" />
 
         {/* Arrows (desktop) */}
         <button
@@ -104,7 +104,7 @@ const StylesRibbon = ({ styles = [] }) => {
                 className={cx(
                   "shrink-0 rounded-full px-4 py-2 text-sm font-semibold",
                   "border transition-all duration-200",
-                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--brand-primary)]/40",
+                  "focus:outline-none focus-visible:ring-2 focus-visible:ring-(--brand-primary)/40",
                   isActive
                     ? "border-transparent text-white shadow-sm " +
                       "bg-[linear-gradient(135deg,var(--brand-primary),var(--brand-secondary))]"
