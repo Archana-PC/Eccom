@@ -4,7 +4,7 @@ import Navbar from "../user/components/navbar/Navbar";
 import MobileFilterModal from "../user/components/filters/Filter/MobileFilterModal";
 import Filter from "../user/components/filters/Filter/Filter";
 import { useGetStylesQuery, useGetCategoriesQuery } from "../user/services/catalog/catalogApi";
-import StylesRibbon from "../user/components/ui/StylesRibbon /StylesRibbon";
+import StylesRibbon from "../user/components/ui/StylesRibbon/StylesRibbon";
 
 // Small ribbon for styles (only name, click -> /styles/:slug)
 
